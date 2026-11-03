@@ -1,0 +1,1 @@
+# HSG_QRM_Assignement2026_CampanileGiannattasio
