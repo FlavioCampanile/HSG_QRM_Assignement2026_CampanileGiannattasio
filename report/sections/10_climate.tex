@@ -1,0 +1,152 @@
+% =====================================================================
+% 10. Physical climate risk: storm overlay -- question (xi)
+% Numbers \val{q11...} come from scripts 06 (CLIMADA) and 07 (overlay).
+% Relative changes are in parts per million (ppm, 1e-6): basis points are too coarse.
+% =====================================================================
+\section{Physical Climate Risk: Storm Overlay (Question xi)}
+\label{sec:climate}
+
+\subsection{FRAMEWORK: HAZARD, EXPOSURE, VULNERABILITY}
+CLIMADA \citep{AznarSiguan19} computes the impact of a natural hazard from three components, which we set up as in the exercise the assignment refers to \citep{HauserEtAl26}.
+\begin{description}
+\item[Hazard] A catalogue of events $e$ with annual frequencies $f_e$ and intensity footprints. We use the probabilistic set of European winter storms restricted to Switzerland that CLIMADA distributes through its data interface (\texttt{storm\_europe}, country \texttt{CHE}); the intensity of an event at a location is the maximum gust speed in m/s. The catalogue contains \val{q11.hazard.n_events|int} events on \val{q11.hazard.meta.n_centroids|int} grid points.
+\item[Exposure] The assets at risk are the collateral that backs recoveries. Each counterparty is placed at the coordinates given in the portfolio file, and the value exposed is its recovery value $E_kR_k$ (USD~\val{q5.recovery_value|usd} in total).
+\item[Vulnerability] An impact function maps intensity into the mean damage ratio, $\MDR=\mathrm{MDD}\times\mathrm{PAA}$: the mean damage degree of the affected assets times the share of assets affected. We use the function calibrated by \citet{Welker21} for building damage from winter storms in Switzerland, which is the one shipped with CLIMADA for this hazard.
+\end{description}
+$\MDR_k(e)$ is the impact function evaluated at the gust speed of event $e$ at the grid point nearest to counterparty $k$ (at most \val{q11.hazard.nearest_km_max|f1}~km away). This is what CLIMADA's impact engine computes for an exposure of value one at that point.
+
+The assignment speaks of events ``affecting counterparty $k$'s canton''. We evaluate the hazard at the coordinates of the counterparty and not at the level of the canton, for two reasons: the coordinates are given and are the most precise information on where the collateral is, and a canton such as Bern or Grisons spans lowland and alpine terrain with very different gust speeds, so a single cantonal value would be less accurate. An event then ``affects'' a counterparty when it causes a positive damage ratio at its location. As a robustness check we repeat the analysis with the damage ratio evaluated at the centroid of the canton and shared by all its counterparties (Section~\ref{subsec:climvariants}).
+
+\subsection{INTERPRETATION OF $\phi_k$}
+The climate-adjusted recovery rate under event $e$ is $R_k(e)=R_k\,(1-\phi_k\,\MDR_k(e))$.
+\begin{itemize}
+\item $\phi_k=0$: none of the recovery value is physically located at the exposed site. Recovery comes entirely from assets that a storm cannot damage, such as financial collateral, guarantees or assets held elsewhere, so $R_k(e)=R_k$ for every event and the counterparty is immune to the overlay.
+\item $\phi_k=1$: the entire recovery value consists of physical assets at the assigned location. Every unit of damage reduces recovery proportionally, $R_k(e)=R_k(1-\MDR_k(e))$, and an event that destroys the site ($\MDR=1$) leaves nothing to recover.
+\end{itemize}
+The value $\phi_k=0.5$ used here assumes that half of the recovery value is physically exposed.
+
+\subsection{SIMULATION DESIGN AND WHAT IT IMPLIES}
+\label{subsec:climdesign}
+The overlay is an independent layer on top of the credit simulation of Sections~\ref{sec:simulation} and \ref{sec:results}.
+\begin{enumerate}
+\item For each of the $10{,}000$ scenarios and each event $e$ of the catalogue, draw $N_e\sim\mathrm{Poisson}(f_e)$, independently across events and of $(\Theta,\epsilon)$. Event $e$ occurs in that simulated year if $N_e\ge1$.
+\item For each counterparty, take the worst event of the year: $m_k=\max\{\MDR_k(e):N_e\ge1\}$, with $m_k=0$ if no event that affects its location occurs.
+\item Recompute the loss with the adjusted loss given default, using the \emph{same} default indicators $I_k$ as in the baseline.
+\end{enumerate}
+With $\phi_k=\phi$ for all counterparties, the loss with overlay is
+\begin{equation}
+\label{eq:lclim}
+L^{\mathrm{clim}}=\sum_{k=1}^{100}E_k\big(1-R_k(1-\phi\, m_k)\big)I_k=L+\phi\,A,\quad A=\sum_{k=1}^{100}E_kR_km_kI_k .
+\end{equation}
+The second expression shows the structure of the effect. The overlay never changes who defaults; it adds, for each defaulted name, the fraction $\phi\,m_k$ of the amount that would otherwise have been recovered. Three results follow before any simulation.
+
+\paragraph{Sign.}
+$L^{\mathrm{clim}}\ge L$ in every scenario, so the expected loss, VaR and ES can only increase.
+
+\paragraph{Expected loss.}
+Because storms are independent of defaults, $\E[L^{\mathrm{clim}}]-\E[L]=\phi\sum_kE_kR_k\,\pi_k\,\E[m_k]$, and $\E[m_k]$ is available in closed form. Order the events that damage location $k$ by decreasing damage ratio, $m_{k,(1)}\ge m_{k,(2)}\ge\dots$, with frequencies $f_{(1)},f_{(2)},\dots$ The worst event of the year is the $j$-th one if none of the more damaging events occurs and the $j$-th does, so
+\begin{equation}
+\label{eq:worstlaw}
+\P\big[m_k=m_{k,(j)}\big]=e^{-(f_{(1)}+\dots+f_{(j-1)})}\big(1-e^{-f_{(j)}}\big),\quad \P[m_k=0]=e^{-\sum_jf_{(j)}} .
+\end{equation}
+
+\paragraph{Tail.}
+The add-on $\phi A$ is small relative to $L$ whenever damage ratios are small. For a small perturbation the change of a quantile is the expected perturbation \emph{at} the quantile, and the change of ES is the expected perturbation \emph{beyond} it \citep{Gourieroux00}; these are the same derivatives that define Euler risk contributions \citep[Sect.~6.3]{McNeil05}. Hence, to first order,
+\begin{equation}
+\label{eq:firstorder}
+\begin{aligned}
+\VaR_\alpha(L^{\mathrm{clim}})-\VaR_\alpha(L)&\approx\phi\,\E[A\mid L=\VaR_\alpha(L)],\\
+\ES_\alpha(L^{\mathrm{clim}})-\ES_\alpha(L)&\approx\phi\,\E[A\mid L\ge\VaR_\alpha(L)],
+\end{aligned}
+\end{equation}
+and by independence of storms and defaults $\E[A\mid L]=\sum_kE_kR_k\,\E[m_k]\,\P[I_k=1\mid L]$. Two consequences are worth stating. First, under independence the tail is not hit harder than the mean: both increase by a fraction of order $\phi\,\E[m_k]$ of the recovery value of the names that default, and the relative increases of EL, VaR and ES differ only through the composition of the defaulting names. A rare storm does not have to coincide with a rare credit event to enter the $99.9\%$ quantile; it enters in proportion to its probability. Second, to first order only the \emph{expected} damage ratios $\E[m_k]$ matter. The dependence of the damage ratios across counterparties, which is positive because a single winter storm covers much of Switzerland, affects VaR and ES only at second order. Both statements rely on the independence between storms and $\Theta$ and are tested by simulation below.
+
+\paragraph{A remark on horizons.}
+The credit loss refers to a horizon of one week, whereas $N_e\sim\mathrm{Poisson}(f_e)$ with annual frequencies describes the storms of one year. We follow the assignment and combine the two, which amounts to assuming that the damage of a whole storm season is unrepaired when the default occurs. A horizon-consistent alternative, with weekly frequencies $f_e/52$, is reported as a variant.
+
+\subsection{SENSITIVITY TO THE DAMAGE RATIO}
+Before turning to the event catalogue, Table~\ref{tab:climsens} reports VaR and ES when every counterparty suffers the same damage ratio $m$ in every scenario. This is an upper bound for any catalogue whose damage ratios do not exceed $m$. The loss increases almost linearly in $m$: a uniform damage ratio of $1\%$ raises VaR by \val{q11s.M2.dVaR_0.01|pct2}\% under M2, \val{q11s.M3.dVaR_0.01|pct2}\% under M3 and \val{q11s.M1.dVaR_0.01|pct2}\% under M1, and one of $10\%$ by ten times as much. By (\ref{eq:firstorder}) the elasticity of ES is $\phi$ times the ratio between the recovery value and the loss of the names that default in the tail, $\sum_kE_kR_kI_k/\sum_kE_k(1-R_k)I_k$, which is \val{q11s.M2.tail_recovery_ratio|f2} in the ten tail scenarios of M2. Since $\phi=0.5$, the rule of thumb is that VaR and ES rise by somewhat less than half of the damage ratio.
+
+\begin{table}[tb]
+\caption{Upper-bound sensitivity: increase of the $99.9\%$ VaR and ES (in \%, $N=10{,}000$, thresholds $\dhat$) when all counterparties suffer the same mean damage ratio $m$ in every scenario, $\phi_k=0.5$.}
+\label{tab:climsens}
+\centering
+\qrmtable{tab_climate_sensitivity}
+\end{table}
+
+\subsection{THE STORM CATALOGUE}
+Table~\ref{tab:climhaz} summarises the catalogue at the locations of the counterparties and Figure~\ref{fig:climhaz} shows its ingredients. The hazard set is the WISC probabilistic set at a resolution of 4.4~km: it consists of \val{q11.hazard.meta.n_orig_events|int} historical winter storms and 29 perturbed versions of each, \val{q11.hazard.n_events|int} events in total, each with the same annual frequency $1/\val{q11.hazard.return_period_rarest|int}$. Of these, \val{q11.hazard.n_damaging|int} cause a positive damage ratio for at least one counterparty. Their frequencies sum to \val{q11.hazard.sum_freq_damaging|f2} per year, so a damaging event occurs in \val{q11.hazard.p_year_damage|pct0}\% of the years. Damage ratios, however, are tiny. The largest gust speed at any counterparty in the whole catalogue is \val{q11.hazard.gust_max|f1}~m/s, reached during the storm of \val{q11.hazard.meta.top_event_date|date} (Lothar); the largest damage ratio is \val{q11.hazard.mdr_max|pct2}\%; and the expected worst damage ratio of a year from (\ref{eq:worstlaw}) is \val{q11.hazard.exp_worst_mean|ppm} parts per million (ppm) on average across counterparties, ranging from practically zero for the names in canton \val{q11.hazard.canton_low|str}, south of the Alps, to \val{q11.hazard.exp_worst_max|ppm}~ppm in canton \val{q11.hazard.canton_high|str}, on the Jura.
+
+The reason is the shape of the impact function (Figure~\ref{fig:climhaz}, right). The function of \citet{Welker21} is zero up to about 20~m/s and rises steeply and convexly above, reaching a damage ratio of $0.1\%$ only close to 40~m/s. The gust speeds at the counterparties lie mostly below 20~m/s: their $99\%$ quantile among the damaging events is \val{q11.hazard.gust_p99_damaging|f1}~m/s. Most storms therefore cause no damage or damage ratios of the order of $10^{-6}$ to $10^{-5}$, and the hazard of a year is concentrated in a few events. The annual damage to the recovery value of the portfolio, $D=\sum_kE_kR_km_k/\sum_kE_kR_k$, is zero in \val{q11.hazard.D_share_zero|pct0}\% of the simulated years, its median is \val{q11.hazard.D_median_over_mean|pct1}\% of its mean, and the worst $1\%$ of the years account for \val{q11.hazard.D_share_of_mean_top1pct|pct0}\% of the mean. The damage ratios of different counterparties are positively but far from perfectly dependent, with an average pairwise correlation across events of \val{q11.hazard.mdr_pairwise_corr_mean|f2}: the most damaging event affects \val{q11.hazard.share_names_hit_by_top_event|pct0}\% of the counterparties at once but destroys only \val{q11.hazard.worst_event_recovery_share|ppm}~ppm of the recovery value of the portfolio.
+
+\begin{table}[tb]
+\caption{The winter-storm catalogue at the locations of the 100 counterparties (CLIMADA \texttt{storm\_europe} hazard for Switzerland, WISC event set, impact function of \citet{Welker21}).}
+\label{tab:climhaz}
+\centering
+\qrmtable{tab_climate_hazard}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_climate_hazard}
+\caption{Left: gust footprint of the most damaging event of the catalogue (26 December 1999) and location of the counterparties (circle area proportional to exposure). Right: impact function (mean damage ratio, logarithmic scale) and frequency-weighted distribution of the gust speeds at the counterparties.}
+\label{fig:climhaz}
+\end{figure}
+
+\subsection{RESULTS}
+Because the effects are small, Table~\ref{tab:clim} reports them in USD and in parts per million of the value without overlay; one basis point is $100$~ppm.
+
+\begin{table}[tb]
+\caption{$99.9\%$ VaR and ES without the storm overlay (USD) and their increase with the overlay, in USD and in parts per million ($\phi_k=0.5$).}
+\label{tab:clim}
+\centering
+\qrmtable{tab_climate}
+\end{table}
+
+\paragraph{Expected loss.}
+The overlay raises the expected loss from USD~\val{q11.EL_base|usd2} to USD~\val{q11.EL_clim_exact|usd2}, by \val{q11.dEL_exact|ppm}~ppm (exact, from (\ref{eq:worstlaw})).
+
+\paragraph{Assignment run.}
+On the $10{,}000$ credit scenarios of question (viii), a damaging storm occurs in \val{q11.assign.share_years_with_damage|pct0}\% of the simulated years and a counterparty is affected in \val{q11.assign.share_name_years_hit|pct0}\% of the counterparty-years, with an average worst damage ratio of \val{q11.assign.mean_worst_mdr_if_hit|ppm}~ppm when affected. The overlay raises VaR by USD~\val{q11.assign.M1.dVaR_usd|usd2} under M1, USD~\val{q11.assign.M2.dVaR_usd|usd2} under M2 and USD~\val{q11.assign.M3.dVaR_usd|usd2} under M3, and ES by USD~\val{q11.assign.M1.dES_usd|usd2}, USD~\val{q11.assign.M2.dES_usd|usd2} and USD~\val{q11.assign.M3.dES_usd|usd2} (Table~\ref{tab:clim}). In relative terms no change exceeds \val{q11.assign.M2.dES|ppm}~ppm.
+
+These figures should not be compared across models. With $N=10{,}000$ the VaR is one scenario, the tenth-largest loss, and its increase is the add-on of that scenario, which depends on the single storm year that happens to be paired with it. Given the skewness of the annual damage, that add-on is usually close to zero and occasionally large. To measure this sampling error we keep the credit scenarios fixed and redraw the $10{,}000$ storm years \val{q11.rep.n_rep|int} times (Figure~\ref{fig:climeff}, top). Under M2 the increase of VaR is zero in \val{q11.rep.M2.dVaR_share_zero|pct0}\% of the re-draws and has a 95\% quantile of \val{q11.rep.M2.dVaR_q95|ppm}~ppm, but its mean is \val{q11.rep.M2.dVaR_mean|ppm}~ppm with a standard deviation of \val{q11.rep.M2.dVaR_sd|ppm}~ppm. The increase of ES, an average over ten scenarios, has a mean of \val{q11.rep.M2.dES_mean|ppm}~ppm and a standard deviation of \val{q11.rep.M2.dES_sd|ppm}~ppm. The other two models behave alike.
+
+\paragraph{Reference run and the first-order effect.}
+The first-order approximation (\ref{eq:firstorder}) uses the exact $\E[m_k]$ and needs no storm simulation. It gives an increase of \val{q11.first_order.M1.dVaR|ppm}, \val{q11.first_order.M2.dVaR|ppm} and \val{q11.first_order.M3.dVaR|ppm}~ppm for VaR and \val{q11.first_order.M1.dES|ppm}, \val{q11.first_order.M2.dES|ppm} and \val{q11.first_order.M3.dES|ppm}~ppm for ES under M1, M2 and M3 (first row of Table~\ref{tab:climvar}). It is confirmed by the simulations in two ways. First, it coincides with the \emph{average} increase over the storm re-draws of the assignment run (\val{q11.rep.M2.dVaR_mean|ppm}~ppm for VaR and \val{q11.rep.M2.dES_mean|ppm}~ppm for ES under M2). Second, in the reference run, where the two million credit scenarios are each paired with an independent storm year, the increase of ES is \val{q11.ref.base.M1.dES|ppm}, \val{q11.ref.base.M2.dES|ppm} and \val{q11.ref.base.M3.dES|ppm}~ppm, within about 15\% of the first-order values. The increase of VaR in the reference run, between zero and \val{q11.ref.base.M1.dVaR|ppm}~ppm, is again the add-on of a single scenario and illustrates the point of the previous paragraph: a quantile responds to the expected add-on only on average over storm draws, and for this hazard a single draw is almost always below the average.
+
+Three conclusions follow. \emph{First}, the tail is not hit harder than the mean. The increase of ES is about \val{q11.first_order.M2.dES|ppm}~ppm against \val{q11.dEL_exact|ppm}~ppm for the expected loss. By (\ref{eq:firstorder}) the relative effect is $\phi$ times the expected damage ratio times the ratio between the recovery value and the loss given default of the defaulting names. That ratio is \val{q11.hazard.recovery_ratio_EL_weighted|f2} for the names that generate the expected loss, mostly B and CCC names, and \val{q11s.M2.tail_recovery_ratio|f2} for the names that default in the tail scenarios of M2. The difference in composition accounts for the whole gap, since $\val{q11s.M2.tail_recovery_ratio|f2}/\val{q11.hazard.recovery_ratio_EL_weighted|f2}$ is close to the ratio of the two relative increases. \emph{Second}, the effect is economically negligible. An increase of ES by USD~\val{q11.first_order.M2.addon_tail_usd|usd2} under M2 compares with a Monte Carlo standard error of VaR of USD~\val{q8.M2.se_VaR_10k_q|usd} at $N=10{,}000$ and with a difference of USD~\val{q8.M3_minus_M2.dVaR_ref|usd} between M3 and M2: it is four orders of magnitude below either. \emph{Third}, the catalogue is far from the bound of Table~\ref{tab:climsens}. A uniform damage ratio of $0.1\%$, a third of the largest damage ratio in the catalogue, would raise VaR by \val{q11s.M2.dVaR_0.001|ppm}~ppm under M2. The actual effect is two orders of magnitude smaller, because the largest damage ratios occur in few events and at few locations.
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_climate_effect}
+\caption{Top: increase of the $99.9\%$ VaR (plain) and ES (hatched) due to the overlay with $N=10{,}000$ over \val{q11.rep.n_rep|int} re-draws of the storm years; box: quartiles; whiskers: 5\% and 95\% quantiles; dot: the assignment run; horizontal line: first-order approximation (\ref{eq:firstorder}). Bottom: increase of ES in the reference run for the baseline overlay and the variants of Table~\ref{tab:climvar}.}
+\label{fig:climeff}
+\end{figure}
+
+\subsection{VARIANTS AND A MORE DIVERSIFIED PORTFOLIO}
+\label{subsec:climvariants}
+\begin{table}[tb]
+\caption{Reference run ($N=2{,}000{,}000$): increase of the expected loss (under M2), VaR and ES due to the storm overlay, in parts per million, for the baseline design and five variants. First row: first-order approximation (\ref{eq:firstorder}) for the baseline. The VaR columns are dominated by the add-on of a single scenario; ES is the reliable measure.}
+\label{tab:climvar}
+\centering
+\qrmtable{tab_climate_variants}
+\end{table}
+
+Table~\ref{tab:climvar} and the lower panel of Figure~\ref{fig:climeff} report five variants of the baseline, each changing one assumption. Since the increase of VaR is dominated by the add-on of a single scenario, we compare the variants through the expected loss and ES.
+
+\paragraph{Canton-level damage.}
+With the damage ratio evaluated at the centroid of the canton, the expected loss rises by \val{q11.ref.canton.M2.dEL|ppm}~ppm against \val{q11.ref.base.M2.dEL|ppm}~ppm in the baseline, and ES under M2 by \val{q11.ref.canton.M2.dES|ppm}~ppm against \val{q11.ref.base.M2.dES|ppm}~ppm. The correlation between the two sets of damage ratios across events and counterparties is only \val{q11.hazard.corr_point_canton|f2}, because gusts vary strongly over a few kilometres, but the errors average out over the portfolio: the choice between coordinates and cantons does not affect the conclusions.
+
+\paragraph{Collateral sensitivity.}
+By (\ref{eq:lclim}) the add-on is linear in $\phi$. With $\phi_k=1$, the case in which all recovery value is physically exposed, the expected loss rises by \val{q11.ref.phi1.M2.dEL|ppm}~ppm and ES under M2 by \val{q11.ref.phi1.M2.dES|ppm}~ppm, twice the baseline.
+
+\paragraph{Horizon.}
+With weekly frequencies $f_e/52$ the expected loss rises by \val{q11.dEL_exact_weekly|ppm}~ppm (exact), against \val{q11.dEL_exact|ppm}~ppm with annual frequencies. Lower frequencies can only lower every $\E[m_k]$, so the annual convention of the assignment is the conservative one.
+
+\paragraph{A more geographically diversified portfolio.}
+All counterparties are located in Switzerland, a territory smaller than the footprint of a typical European winter storm, so one event affects much of the portfolio at once. To see what geographical diversification would change we simulate the limiting case in which every counterparty draws its own, independent storm year from the exact law (\ref{eq:worstlaw}). Each location keeps its hazard, hence its expected damage ratio and the expected loss, but no two names are ever hit by the same event. The first-order analysis predicts that this changes little. As long as storms are independent of the credit cycle and damage ratios are small, VaR and ES respond to the \emph{expected} damage at the locations of the defaulting names, and the concentration of the portfolio in one storm region matters only at second order. The simulation confirms it: the increase of ES is \val{q11.ref.diversified.M1.dES|ppm}, \val{q11.ref.diversified.M2.dES|ppm} and \val{q11.ref.diversified.M3.dES|ppm}~ppm under M1, M2 and M3, against \val{q11.ref.base.M1.dES|ppm}, \val{q11.ref.base.M2.dES|ppm} and \val{q11.ref.base.M3.dES|ppm}~ppm in the baseline, higher for one model and lower for the others, with no systematic difference.
+
+A more diversified portfolio would therefore show a different overlay effect mainly to the extent that the \emph{average} hazard at its locations differs from the Swiss one. The effect would be smaller in regions with weaker storms, as south of the Alps in our own data. It would be larger where the hazard is more destructive, such as along the North Sea coasts for winter storms, or in tropical-cyclone and flood zones. It would not be smaller merely because the hazard is spread across regions. Diversification reduces the dispersion of the add-on, which becomes relevant for VaR and ES only when damage ratios are large enough for the add-on to reorder the tail scenarios. For a Swiss winter-storm portfolio they are not.
+
+\paragraph{Dependence between storm years and credit years.}
+The conclusion changes if the independence assumption is dropped. In the last variant the storm years are the same as in the baseline but are paired with the credit scenarios in a comonotone way: the most severe storm years (by expected add-on) are assigned to the scenarios with the largest credit losses. The marginal laws of storms and of credit losses are unchanged. The increase of ES under M2 becomes \val{q11.ref.comonotone.M2.dES|ppm}~ppm, or USD~\val{q11.ref.comonotone.M2.dES_usd|usd}, \val{q11.ref.comonotone.M2.dES_vs_base|f0} times the baseline, and that of VaR \val{q11.ref.comonotone.M2.dVaR|ppm}~ppm, while the expected loss rises by \val{q11.ref.comonotone.M2.dEL|ppm}~ppm. Under dependence the tail scenarios receive the damage of the worst storm years and not the average damage. It is in this case that geographical concentration becomes costly: the worst storm year hits all Swiss names together, whereas in a diversified portfolio no single year is the worst everywhere. Even this extreme pairing, however, moves ES by less than $0.02\%$. The comonotone pairing is not a realistic description, since a winter storm does not cause a recession. It bounds the cost of the independence assumption, which the assignment itself calls a stark simplification, and it is the relevant benchmark for hazards that damage the regional economy on which the obligors depend.

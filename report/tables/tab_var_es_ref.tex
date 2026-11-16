@@ -1,0 +1,14 @@
+\begin{tabular}{lrrrrrrr}
+\toprule
+ & \multicolumn{5}{c}{$\alpha=99.9\%$} & \multicolumn{2}{c}{$\alpha=99\%$} \\
+\cmidrule(lr){2-6}\cmidrule(lr){7-8}
+Model & VaR & ES & UL & ES/VaR & \% exp. & VaR & ES \\
+\midrule
+M1 empirical & 1,090,182 & 1,227,586 & 1,023,095 & 1.126 & 23.0 & 600,219 & 794,121 \\
+M2 Gaussian & 743,564 & 863,731 & 676,477 & 1.162 & 15.7 & 515,167 & 616,881 \\
+M3 $t$-copula & 753,955 & 876,190 & 686,868 & 1.162 & 15.9 & 518,071 & 623,504 \\
+\midrule
+M3 $-$ M2 & 10,391 & 12,460 & 10,391 & -- & -- & 2,904 & 6,623 \\
+(std.\ error) & (2,634) & (4,481) & (2,634) &  &  &  &  \\
+\bottomrule
+\end{tabular}

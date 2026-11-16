@@ -1,0 +1,11 @@
+,M1 empirical,M2 Gaussian,M3 $t$-copula
+"VaR$_{99.9\%}$, large pool","1,061,494","715,455","726,125"
+"ES$_{99.9\%}$, large pool","1,193,907","832,603","845,671"
+Mean number of defaults,2.28,2.27,2.27
+99.9\% quantile of defaults,41,26,26
+Thresholds $\hat d_k$: mean of 200 VaR estimates,"1,100,703","749,030","757,793"
+\quad standard deviation,"30,342","26,102","25,523"
+\quad root mean squared error,"32,043","26,604","25,747"
+Thresholds $d_k$: mean of 200 VaR estimates,"1,100,452","749,279","759,872"
+\quad standard deviation,"57,031","33,215","32,267"
+\quad root mean squared error,"57,808","33,621","32,726"

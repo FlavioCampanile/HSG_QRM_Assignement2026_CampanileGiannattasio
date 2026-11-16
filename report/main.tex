@@ -1,0 +1,124 @@
+% =====================================================================
+%  7,320 Quantitative Risk Management (HSG, Autumn 2026) -- Assignment
+%  Campanile, Giannattasio
+%
+%  Compile with pdfLaTeX (twice).  Files:
+%     main.tex                 this file: preamble, title, abstract
+%     sections/*.tex           one file per section (text is edited there)
+%     generated/numbers.tex    every number quoted in the text  [written by scripts/08_build_report.py]
+%     tables/*.tex             table bodies                     [idem]
+%     figures/*.pdf            figures                          [idem]
+%     roffin.cls               document class of the course template
+% =====================================================================
+
+% --- Compatibility of roffin.cls (2008) with a current LaTeX kernel -----------------------
+% roffin.cls replaces \document and \enddocument by copies of the 2008 kernel code.  With a
+% current kernel this breaks natbib (citations print as "[?]") and raises "Extra \endgroup".
+% We keep the kernel's own definitions and restore them after the class is loaded.
+\let\qrmkerneldocument\document
+\let\qrmkernelenddocument\enddocument
+\documentclass{roffin}
+\makeatletter
+\let\document\qrmkerneldocument
+\let\enddocument\qrmkernelenddocument
+% the class's \enddocument recorded the last page for the running head "first--last": do it here
+\AtEndDocument{\immediate\write\@auxout{\string\endpage{\thepage}}}
+% roffin.cls defines its own equation* environment, which clashes with amsmath: free the name
+\expandafter\let\csname equation*\endcsname\relax
+\expandafter\let\csname endequation*\endcsname\relax
+% roffin.cls stores the full stop in \thesection ("1."), so that \ref prints "Section 1.".
+% Keep the printed headings unchanged ("1. Title", "1.1 TITLE") but make references clean.
+\renewcommand\thesection{\arabic{section}}
+\renewcommand\thesubsection{\thesection.\arabic{subsection}}
+\renewcommand\thesubsubsection{\thesubsection.\arabic{subsubsection}}
+\def\qrm@dot@section{.}
+\def\@seccntformat#1{\csname the#1\endcsname\@nameuse{qrm@dot@#1}\hskip .5em}
+\makeatother
+
+\usepackage{amsmath,amssymb,graphicx,booktabs}
+\graphicspath{{figures/}}
+
+% --- Notation -------------------------------------------------------------------------------
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Corr}{\mathrm{Corr}}
+\newcommand{\VaR}{\mathrm{VaR}}
+\newcommand{\ES}{\mathrm{ES}}
+\newcommand{\UL}{\mathrm{UL}}
+\newcommand{\MDR}{\mathrm{MDR}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\dhat}{\hat d_k}
+
+% --- Numbers from the code --------------------------------------------------------------------
+% \val{key|format} prints the value defined in generated/numbers.tex; a value that has not been
+% computed yet is printed as a bold [key], so that it cannot be overlooked.
+\makeatletter
+\newcommand{\qrmdef}[2]{\expandafter\gdef\csname qrm@\detokenize{#1}\endcsname{#2}}
+\DeclareRobustCommand{\val}[1]{%
+  \ifcsname qrm@\detokenize{#1}\endcsname\csname qrm@\detokenize{#1}\endcsname
+  \else\mbox{\textbf{[\texttt{\detokenize{#1}}]}}\fi}
+\makeatother
+\InputIfFileExists{generated/numbers.tex}{}{}
+% Visible reminder for text that can only be written once the CLIMADA results exist.
+\newcommand{\todo}[1]{\textbf{[TO DO: #1]}}
+
+% --- Tables: scale down to the text width only when a table is wider -------------------------
+\newsavebox{\qrmbox}
+\newcommand{\fittable}[1]{\sbox{\qrmbox}{#1}%
+  \ifdim\wd\qrmbox>\textwidth\resizebox{\textwidth}{!}{\usebox{\qrmbox}}\else\usebox{\qrmbox}\fi}
+% \qrmtable{name} and \qrmfigure{name} include tables/name.tex and figures/name.pdf; if the file
+% has not been produced yet (question xi before the CLIMADA run) a visible note is printed instead.
+\newcommand{\qrmtable}[1]{\IfFileExists{tables/#1.tex}%
+  {{\small\setlength{\tabcolsep}{3.5pt}\fittable{\input{tables/#1}}}}%
+  {\todo{table \texttt{\detokenize{#1}} is written by the scripts}}}
+\newcommand{\qrmfigure}[1]{\IfFileExists{figures/#1.pdf}%
+  {\includegraphics[width=\textwidth]{#1}}%
+  {\todo{figure \texttt{\detokenize{#1}} is written by the scripts}}}
+
+\begin{document}
+
+\jname{Quantitative Risk Management Course}
+\jyear{2026/27}
+\jvol{}
+\jnum{}
+\doi{}
+\accessdate{1 December 2026}
+\copyrightinfo{Campanile, Giannattasio 2026.}
+
+\markboth{Campanile, Giannattasio - University of St. Gallen (HSG)}{How Heavy Is the Tail?}
+
+\title{How Heavy Is the Tail? Value-at-Risk and Expected Shortfall of a Credit Portfolio under Empirical, Gaussian and $t$-Copula Market Factors}
+
+\author{Flavio Massimo Campanile$^1$, Pietro Tommaso Giannattasio$^2$}
+\affil{$^1$University of St. Gallen (HSG), LUISS University}
+\affil{$^2$University of St. Gallen (HSG)}
+
+\maketitle
+
+\begin{abstract}
+We estimate the one-week value-at-risk (VaR) and expected shortfall (ES) at the $99.9\%$ level of a portfolio of 100 corporate bonds whose defaults are driven by the weekly returns of the Swiss Performance Index and of the S\&P~500. Default probabilities, and hence the expected loss of USD~\val{q5.EL|usd}, are held fixed, while the joint law of the two factors is either the empirical distribution (M1), a bivariate Gaussian (M2), or Gaussian margins with a $t$-copula (M3). In a reference simulation with two million scenarios the VaR is USD~\val{q8.M2.VaR_ref|mn2} million under M2, USD~\val{q8.M3.VaR_ref|mn2} million under M3 and USD~\val{q8.M1.VaR_ref|mn2} million under M1. The $t$-copula is statistically preferred to the Gaussian copula but adds only \val{q8.M3.VaR_vs_M2|pct1}\% to VaR; the fat-tailed, left-skewed margins of the empirical distribution add \val{q8.M1.VaR_vs_M2|pct0}\%. With the $10{,}000$ scenarios requested, the Monte Carlo standard error of VaR is \val{derived.se_rel_min|pct0}--\val{derived.se_rel_max|pct0}\%, larger than the M2--M3 difference. The Basel IRB capital is USD~\val{q10.K|usd}, about a third of the model-based unexpected loss, almost entirely because the systematic weights of the portfolio exceed the regulatory asset correlations. In rolling 500-day windows the Gaussian VaR is nearly constant, whereas the empirical VaR depends on whether a crash week lies inside the window. A winter-storm overlay built with CLIMADA, which erodes recovery values, raises the expected loss by \val{q11.dEL_exact|ppm} parts per million and ES by a similar amount; we show that, with storms independent of credit risk, only the expected damage at the defaulting names matters, so geographical concentration is irrelevant to first order.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+\input{sections/Introduction/1_1_motivation_research_question}
+\input{sections/Introduction/1_2_what_we_do_and_find}
+\input{sections/Introduction/1_3_roadmap}
+
+\input{sections/2_risk_measures}
+\input{sections/3_model}
+\input{sections/4_data}
+\input{sections/5_factor_models}
+\input{sections/6_simulation}
+\input{sections/7_results_var_es}
+\input{sections/8_rolling}
+\input{sections/9_basel_irb}
+\input{sections/10_climate}
+\input{sections/11_conclusion}
+\input{sections/appendix}
+
+\input{sections/bibliography}
+
+\end{document}

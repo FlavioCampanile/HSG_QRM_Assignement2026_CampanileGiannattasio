@@ -1,0 +1,17 @@
+# conda environment for the whole project (question xi needs CLIMADA):
+#   conda env create -f environment.yml      (or: mamba env create -f environment.yml)
+#   conda activate climada_env
+#   pip install -e .
+name: climada_env
+channels:
+  - conda-forge
+dependencies:
+  - climada
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - openpyxl
+  - statsmodels
+  - ipykernel
+  - pip

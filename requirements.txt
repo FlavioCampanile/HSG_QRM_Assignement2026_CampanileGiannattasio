@@ -1,6 +1,7 @@
-numpy
-pandas
-scipy
-matplotlib
-openpyxl
-statsmodels
+numpy>=1.26
+scipy>=1.11
+pandas>=2.1
+matplotlib>=3.8
+openpyxl>=3.1
+# question (xi), script 06 only - install with conda/mamba, not pip:
+#   mamba install -c conda-forge climada

@@ -1,0 +1,30 @@
+% =====================================================================
+% Appendix A (Merton), B (Monte Carlo design), C (code)
+% Unnumbered headings, as in the course template; referred to in the
+% text as "Appendix A/B/C".
+% =====================================================================
+\appendix
+\section*{Appendix}
+
+\subsection*{A. MERTON'S MODEL AND THE THRESHOLD REPRESENTATION}
+In Merton's model \citep[Ch.~2]{DeGiorgi26} a firm is financed by equity and by a single zero-coupon bond with face value $B_k$ maturing at $T$, and its asset value follows a geometric Brownian motion, so that
+\[
+V_{k,T}=V_{k,0}\exp\!\big((\mu_{V,k}-\tfrac12\sigma_{V,k}^2)T+\sigma_{V,k}W_{k,T}\big).
+\]
+The firm defaults if its assets are worth less than its debt at maturity, $V_{k,T}\le B_k$. Taking logarithms, default occurs if and only if the asset-value log-return $Y_k=\log(V_{k,T}/V_{k,0})$ is at or below $d_k=\log(B_k/V_{k,0})$: this is the representation $I_k=\ind_{\{Y_k\le d_k\}}$ of Section~\ref{sec:model}, with $d_k$ a measure of leverage. In the original model $Y_k$ is Gaussian and the default probability is $\Phi\big((d_k-(\mu_{V,k}-\frac12\sigma_{V,k}^2)T)/(\sigma_{V,k}\sqrt T)\big)$. The model of the assignment keeps the threshold structure and changes two things. It specifies the dependence between firms through a factor decomposition of $Y_k$ \citep[Sect.~8.3]{McNeil05}, and it does not require $Y_k$ to be Gaussian, since the factors $\Theta$ may follow M1, M2 or M3. Because neither asset values nor debt levels are observed, $d_k$ is not computed from a balance sheet but calibrated to the default probability of the rating class, as in the industry implementations of the model.
+
+\subsection*{B. MONTE CARLO DESIGN}
+\paragraph{Common random numbers.}
+One scenario is built from the primitive draws $(Z_1,Z_2,U_W,U_B,\epsilon_1,\dots,\epsilon_{100})$, where $Z_1,Z_2,\epsilon_k$ are independent $N(0,1)$ and $U_W,U_B$ independent uniforms. The same pair $(Z_1,Z_2)$ enters the Cholesky step of M2 and of M3; the mixing variable of M3 is obtained by inversion, $W=F^{-1}_{\chi^2_{\hat\nu}}(U_W)$; M1 selects the historical week with index $\lceil nU_B\rceil$; and the idiosyncratic shocks $\epsilon_k$ are identical under the three models. M2 and M3 therefore see the same Gaussian shocks and differ only through their parameters and the mixing variable, while M1 can share only the idiosyncratic shocks. All generators are seeded.
+
+\paragraph{Reference run.}
+The reference run consists of $2{,}000{,}000$ scenarios per model, generated in $200$ blocks of $10{,}000$ with common random numbers and evaluated with the reference thresholds. The blocks serve as independent replications of the assignment's experiment (Section~\ref{sec:results}), and the same scenarios are reused for the climate overlay (Section~\ref{sec:climate}).
+
+\paragraph{Placebo experiment.}
+The placebo model of Section~\ref{sec:rolling} is M3 with the means, volatilities and correlation of M2 and $\nu=200$. Its VaR and ES are compared with those of M2 exactly as in one rolling window ($50{,}000$ scenarios, common random numbers, thresholds by quadrature with step $0.2$), for $200$ independent seeds at the full-sample parameters. A mean difference close to zero (\val{q9.placebo.VaR_mean|spct2}\% for VaR; the placebo copula is not exactly Gaussian) shows that the thresholds introduce no material systematic difference between the two models. Repeating the experiment with the actual full-sample M3, whose VaR exceeds that of M2 by \val{q8.M3.VaR_vs_M2|pct1}\% in the reference run, gives a measured difference with mean \val{q9.placebo.M3_VaR_mean|spct1}\% and standard deviation \val{q9.placebo.M3_VaR_sd|pct1}\%, negative for \val{q9.placebo.M3_VaR_share_neg|pct0}\% of the seeds: even $50{,}000$ scenarios do not reliably recover the sign of an effect of this size.
+
+\paragraph{Storm years.}
+The assignment run of Section~\ref{sec:climate} draws $N_e\sim\mathrm{Poisson}(f_e)$ event by event, as prescribed. For the re-draws and the reference run we use an equivalent and faster sampler: by the superposition property of Poisson variables, independent counts $N_e$ with means $f_e$ have the same law as a total number of events $M\sim\mathrm{Poisson}(\sum_ef_e)$ whose identities are drawn independently with probabilities $f_e/\sum_{e'}f_{e'}$. Both samplers reproduce the exact expectation implied by (\ref{eq:worstlaw}) in our tests.
+
+\subsection*{C. CODE}
+\sloppy The analysis is written in Python and attached as a zip archive. The package \texttt{src/qrm} contains one module per task: \texttt{data.py} (loading, cleaning, weekly returns), \texttt{factor\_models.py} (M1--M3: estimation and simulation), \texttt{credit\_model.py} ($s_k$, thresholds, conditional default probabilities, losses), \texttt{risk\_measures.py} (VaR and ES), \texttt{rolling.py} (question ix), \texttt{basel\_irb.py} (question x), \texttt{climada\_io.py} (question xi: hazard and impact function from CLIMADA) and \texttt{climate.py} (question xi: storm years and overlay). The numbered scripts in \texttt{scripts/} reproduce every table and figure of this report in the order of the questions, and \texttt{run\_all.py} runs them in sequence. Only script \texttt{06} requires CLIMADA; it stores the frequencies and damage ratios in a file, so that the rest of the analysis runs without it. Every number quoted in the text is read from the output of the scripts when the report is built. Numerical optimisation uses SciPy; the likelihoods, the simulation algorithms and the risk-measure estimators are implemented explicitly and follow the formulas derived in the text.

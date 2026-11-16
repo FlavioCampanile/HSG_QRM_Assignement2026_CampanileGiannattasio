@@ -1,8 +1,16 @@
 __pycache__/
 *.pyc
+*.egg-info/
 .venv/
 .ipynb_checkpoints/
 .DS_Store
+.vscode/
+
+# large or regenerated intermediate results
+results/tables/sim_losses.npz
+results/tables/rolling_partial.csv
+*_DEMO.*
+
 # LaTeX build artefacts
 report/*.aux
 report/*.log
@@ -11,7 +19,14 @@ report/*.toc
 report/*.synctex.gz
 report/*.bbl
 report/*.blg
+report/*.fls
+report/*.fdb_latexmk
+report/main.pdf
+
 # CLIMADA caches / large downloads
 climada_data/
 *.hdf5
 data/raw/*.zip
+
+# previous content of the repository, kept locally until it is deleted by hand
+_archive_old/

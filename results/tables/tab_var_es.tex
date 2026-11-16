@@ -1,0 +1,13 @@
+\begin{tabular}{lrrrrrr}
+\toprule
+ & \multicolumn{2}{c}{Thresholds $\hat d_k$} & \multicolumn{2}{c}{Thresholds $d_k$} & \multicolumn{2}{c}{Std.\ error of VaR} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Model & VaR & ES & VaR & ES & with $\hat d_k$ & with $d_k$ \\
+\midrule
+M1 empirical & 1,091,112 & 1,177,193 & 1,099,333 & 1,223,611 & 30,342 & 57,031 \\
+M2 Gaussian & 743,458 & 855,472 & 718,302 & 846,177 & 26,102 & 33,215 \\
+M3 $t$-copula & 726,596 & 943,662 & 755,240 & 957,545 & 25,523 & 32,267 \\
+\midrule
+M3 $-$ M2 & -16,862 & 88,189 & 36,938 & 111,368 & 31,424 & 37,250 \\
+\bottomrule
+\end{tabular}

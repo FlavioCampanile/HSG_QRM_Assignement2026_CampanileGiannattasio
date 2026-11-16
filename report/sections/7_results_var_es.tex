@@ -1,0 +1,70 @@
+% =====================================================================
+% 7. Value-at-risk and expected shortfall -- question (viii)
+% =====================================================================
+\section{Value-at-Risk and Expected Shortfall (Question viii)}
+\label{sec:results}
+
+\subsection{ESTIMATORS}
+Let $\ell_{(1)}\ge\ell_{(2)}\ge\dots\ge\ell_{(N)}$ be the simulated losses in decreasing order, each with probability $1/N$. Applying (\ref{eq:var}) to the empirical distribution of $X=-L$, the condition $\P[X\le x]\ge1-\alpha$ first holds when at least $N(1-\alpha)$ scenarios have a loss of $-x$ or more, so
+\[
+\widehat{\VaR}_\alpha=\ell_{(k^*)},\qquad k^*=\min\{k:\ k/N\ge1-\alpha\}=\lceil N(1-\alpha)\rceil ,
+\]
+which is the rule for discrete distributions of the lecture notes \citep[Ch.~1]{DeGiorgi26}. For $N=10{,}000$ and $\alpha=99.9\%$, $k^*=10$: VaR is the tenth-largest loss. Applying (\ref{eq:es}),
+\begin{align*}
+\widehat{\ES}_\alpha=\frac{1}{N(1-\alpha)}\Big\{&\sum_{j:\ \ell_j\ge\widehat{\VaR}_\alpha}\ell_j\\[-4pt]
+&-\widehat{\VaR}_\alpha\big(\#\{j:\ell_j\ge\widehat{\VaR}_\alpha\}-N(1-\alpha)\big)\Big\},
+\end{align*}
+which, when $N(1-\alpha)$ is an integer, is the average of the $N(1-\alpha)=10$ largest losses; the second term corrects for ties at the VaR level, which do occur because $L$ is discrete.
+
+Ten observations are a thin basis for an estimate. To measure the Monte Carlo error we run a \emph{reference simulation} with $N=2{,}000{,}000$ scenarios per model, with the reference thresholds $d_k$ and, as in the assignment run, common random numbers across the three models. Its $200$ blocks of $10{,}000$ scenarios are $200$ independent replications of the assignment's experiment. In each block we compute VaR and ES twice, with the reference thresholds and with the empirical-quantile thresholds re-estimated on that block. The standard deviation across blocks is the standard error of the corresponding $N=10{,}000$ estimator. Because the models share their random numbers within a block, the standard deviation across blocks of the \emph{difference} between two models is the standard error of that difference, and dividing it by $\sqrt{200}$ gives an approximate standard error for the difference in the reference run.
+
+\subsection{RESULTS}
+\begin{table}[tb]
+\caption{Assignment run: $99.9\%$ VaR and ES in USD from $N=10{,}000$ scenarios. The same scenarios are evaluated with the empirical-quantile thresholds $\dhat$ of (\ref{eq:dhat}) and with the reference thresholds $d_k$. Standard errors: standard deviation of the estimator over 200 replications; in the last row, of the difference M3 $-$ M2 under common random numbers. The expected loss is USD~\val{q5.EL|usd} under all models.}
+\label{tab:var}
+\centering
+\qrmtable{tab_var_es}
+\end{table}
+
+\begin{table}[tb]
+\caption{Reference run: VaR, ES and unexpected loss ($\UL=\VaR-\mathrm{EL}$) in USD from $N=2{,}000{,}000$ scenarios with the reference thresholds $d_k$; ``\% exp.'' is the VaR in per cent of total exposure. Standard errors of the differences in parentheses.}
+\label{tab:varref}
+\centering
+\qrmtable{tab_var_es_ref}
+\end{table}
+
+\begin{table}[tb]
+\caption{Additional results from the reference run (USD). ``Large pool'' refers to the distribution of $\E[L\mid\Theta]$ in (\ref{eq:condloss}). Lower part: mean, standard deviation and root mean squared error (against the reference-run VaR) of the two $N=10{,}000$ VaR estimators over 200 replications.}
+\label{tab:varx}
+\centering
+\qrmtable{tab_var_es_extra}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_loss_tail}
+\caption{Left: exceedance probability of the portfolio loss in the reference run; dots mark the $99.9\%$ VaR. Right: distribution of the VaR estimators with $N=10{,}000$ over 200 replications, with thresholds $\dhat$ (hatched) and $d_k$ (plain); box: quartiles; whiskers: 1.5 interquartile ranges; horizontal line: reference-run value.}
+\label{fig:tail}
+\end{figure}
+
+\paragraph{Assignment run.}
+With $N=10{,}000$ scenarios and the thresholds $\dhat$ (Table~\ref{tab:var}), the $99.9\%$ VaR is USD~\val{q8.M2.VaR_10k_quantile_thr|usd} under M2, USD~\val{q8.M3.VaR_10k_quantile_thr|usd} under M3 and USD~\val{q8.M1.VaR_10k_quantile_thr|usd} under M1; the ES is USD~\val{q8.M2.ES_10k_quantile_thr|usd}, USD~\val{q8.M3.ES_10k_quantile_thr|usd} and USD~\val{q8.M1.ES_10k_quantile_thr|usd}. With the reference thresholds the same scenarios give a VaR of USD~\val{q8.M2.VaR_10k|usd}, USD~\val{q8.M3.VaR_10k|usd} and USD~\val{q8.M1.VaR_10k|usd}. The two sets of figures differ by at most \val{derived.max_thr_gap|pct1}\%, about one standard error. They agree on the position of M1, far above the other two models, and disagree on the order of M2 and M3: the VaR of M3 is \val{q8.M3_minus_M2.dVaR_10k_q_rel|spct1}\% relative to M2 with $\dhat$ and \val{q8.M3_minus_M2.dVaR_10k_rel|spct1}\% with $d_k$. We show below that neither number is informative, and base the comparison of the models on the reference run.
+
+\paragraph{Reference run.}
+With two million scenarios (Table~\ref{tab:varref}) the $99.9\%$ VaR is USD~\val{q8.M2.VaR_ref|usd} under M2, USD~\val{q8.M3.VaR_ref|usd} under M3 and USD~\val{q8.M1.VaR_ref|usd} under M1, that is \val{q8.M2.VaR_pct_exposure|pct1}\%, \val{q8.M3.VaR_pct_exposure|pct1}\% and \val{q8.M1.VaR_pct_exposure|pct1}\% of total exposure. The corresponding ES values are USD~\val{q8.M2.ES_ref|usd}, USD~\val{q8.M3.ES_ref|usd} and USD~\val{q8.M1.ES_ref|usd}. ES exceeds VaR by \val{derived.ES_over_VaR_min|pct0}--\val{derived.ES_over_VaR_max|pct0}\%, and the ranking of the models is the same for both measures. The expected loss is the same in all models, as intended, so the differences in VaR carry over one-to-one to the unexpected loss.
+
+\paragraph{M3 against M2: the copula.}
+The $t$-copula raises VaR by \val{q8.M3.VaR_vs_M2|pct1}\% and ES by \val{q8.M3.ES_vs_M2|pct1}\%. The difference in VaR is USD~\val{q8.M3_minus_M2.dVaR_ref|usd} with a standard error of about USD~\val{q8.M3_minus_M2.se_dVaR_ref|usd}, and that in ES is USD~\val{q8.M3_minus_M2.dES_ref|usd} with a standard error of about USD~\val{q8.M3_minus_M2.se_dES_ref|usd}: both are statistically distinguishable from zero and economically minor. The effect has the expected sign but is small, despite the clear statistical rejection of the Gaussian copula in Section~\ref{sec:factormodels}. Three features of the setting explain this. First, by (\ref{eq:standardised}) the factors affect counterparty $k$ only through the weighted sum $V_k\propto a_k'\Theta$ with non-negative weights. Under M3 both components are Gaussian and positively dependent; the copula changes how often the two indices are jointly extreme, which makes the sum mildly leptokurtic. The scope for this is limited: the correlation is already about $0.7$, and in the limiting case of perfect dependence the sum would again be exactly Gaussian. Second, $\hat\nu\approx15$ is a moderate departure from the Gaussian copula. Third, the idiosyncratic shocks remain Gaussian and independent. This last point answers the question raised in the introduction. In the experiment of \citet[Table~8.4]{McNeil05} the mixing variable $W$ of the $t$ distribution is common to \emph{all} obligors, including their idiosyncratic components, and multiplies the tail of the number of defaults; here it is shared by two market factors only, and its effect is diluted almost completely.
+
+\paragraph{M1 against M2: the whole empirical distribution.}
+The empirical distribution raises VaR by \val{q8.M1.VaR_vs_M2|pct0}\% and ES by \val{q8.M1.ES_vs_M2|pct0}\%; the $99.9\%$ quantile of the number of defaults rises from \val{q8.M2.defaults_q999|int} to \val{q8.M1.defaults_q999|int} (Table~\ref{tab:varx}). At the $99\%$ level the difference in VaR is only \val{derived.M1_vs_M2_99|pct0}\%: the models separate in the far tail. The reason is visible in the data. Each observed week has probability $1/n=\val{derived.one_over_n|pct3}\%$ under M1, so the $0.1\%$ tail of the factor distribution consists of one or two weeks. The conditional expected loss $\E[L\mid\Theta=\theta_t]$ is largest in the weeks ending \val{derived.cel1_week|date} (USD~\val{derived.cel1|mn2} million, with SPI and SPX down by \val{derived.cel1_spi|pct1}\% and \val{derived.cel1_spx|pct1}\%), \val{derived.cel2_week|date} (USD~\val{derived.cel2|mn2} million) and \val{derived.cel3_week|date} (USD~\val{derived.cel3|mn2} million). The large-pool VaR under M1 in Table~\ref{tab:varx} coincides with the second of these values. A weekly fall of 16\% is a seven-standard-deviation event which M2 and M3, with their Gaussian margins, essentially never generate. Since M1 differs from M2 both in the margins and in the dependence, and M3 shows that dependence alone contributes little, we attribute most of the gap to the skewness and kurtosis of the margins.
+
+This also reveals the weakness of M1. Its $99.9\%$ VaR is a statement about the two worst weeks out of \val{q4.n_weeks|int}, and would change substantially if the sample started after 2008 or if a worse week were added. The simulation error can be reduced at will; this estimation error cannot. M1 also cannot produce a scenario worse than the worst one observed.
+
+\paragraph{Monte Carlo error and the two thresholds.}
+The lower part of Table~\ref{tab:varx} and the right panel of Figure~\ref{fig:tail} compare the two $N=10{,}000$ estimators over the 200 replications. With the reference thresholds the standard error of VaR is USD~\val{q8.M2.se_VaR_10k|usd} under M2, USD~\val{q8.M3.se_VaR_10k|usd} under M3 and USD~\val{q8.M1.se_VaR_10k|usd} under M1, that is \val{q8.M2.se_rel_VaR_10k|pct1}\%, \val{q8.M3.se_rel_VaR_10k|pct1}\% and \val{q8.M1.se_rel_VaR_10k|pct1}\% of the reference-run value. With the empirical-quantile thresholds it is smaller: USD~\val{q8.M2.se_VaR_10k_q|usd}, USD~\val{q8.M3.se_VaR_10k_q|usd} and USD~\val{q8.M1.se_VaR_10k_q|usd} (\val{q8.M2.se_rel_VaR_10k_q|pct1}\%, \val{q8.M3.se_rel_VaR_10k_q|pct1}\% and \val{q8.M1.se_rel_VaR_10k_q|pct1}\%). The averages of the two estimators almost coincide, between \val{derived.bias_min|pct1}\% and \val{derived.bias_max|pct1}\% above the reference-run value, the usual small-sample bias of an extreme order statistic. The likely reason for the lower variance is that $\dhat$ is recomputed on each sample: a sample that happens to contain many adverse factor scenarios also produces lower thresholds, and the two errors partly offset each other, most visibly under M1, where the tail depends on how often the few crash weeks are drawn. Recalibrating in the sample thus acts like a control variate that forces every simulated default frequency to its known value. The empirical quantile is a noisy estimate of each individual threshold, as shown in Section~\ref{sec:simulation}, but at $N=10{,}000$ it is the better basis for the portfolio VaR.
+
+Neither estimator can rank M2 and M3 at this sample size. The standard deviation across replications of the VaR difference M3 $-$ M2 is USD~\val{q8.M3_minus_M2.ref_thr.sd_dVaR_crn|usd} with the reference thresholds (USD~\val{q8.M3_minus_M2.lit_thr.sd_dVaR_crn|usd} with $\dhat$), \val{derived.noise_ratio|f1} times the difference of USD~\val{q8.M3_minus_M2.dVaR_ref|usd} found in the reference run. Common random numbers help, since the same blocks paired at random, as with independent streams, give USD~\val{q8.M3_minus_M2.ref_thr.sd_dVaR_indep|usd}, but the reduction of \val{q8.M3_minus_M2.sd_reduction_crn|pct0}\% is modest: the two models turn the same shocks into different factor scenarios, and the correlation between their VaR estimates is only \val{q8.M3_minus_M2.ref_thr.corr_VaR_M2_M3|f2}. As a result M3 comes out \emph{below} M2 in \val{q8.M3_minus_M2.ref_thr.p_M3_below_M2_crn|pct0}\% of the replications. The opposite signs obtained in our assignment run with the two thresholds are an instance of this. The statement that the $t$-copula raises VaR, and by how much, rests on the reference run alone.
+
+\paragraph{Granularity.}
+The large-pool figures show that name concentration is a minor component of risk: removing idiosyncratic risk altogether lowers VaR by at most \val{derived.gran_share_VaR_max|pct1}\% across the three models.

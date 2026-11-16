@@ -1,0 +1,71 @@
+% =====================================================================
+% 3. The credit portfolio model -- theory questions (i), (ii), (iii)
+% =====================================================================
+\section{The Credit Portfolio Model (Questions i--iii)}
+\label{sec:model}
+
+\subsection{SETTING}
+Counterparty $k=1,\dots,100$ has exposure $E_k$, recovery rate $R_k$ and default probability $\pi_k$. Its asset-value log-return over the horizon $T=1$ week is
+\begin{equation}
+\label{eq:Yk}
+Y_k = \sqrt{\lambda_k}\, a_k'\Theta + \sqrt{1-\lambda_k}\, s_k\, \epsilon_k ,
+\end{equation}
+where $\Theta=(\Theta_1,\Theta_2)'$ are the weekly log-returns of SPI and SPX, $a_k\in\mathbb{R}^2$ and $\lambda_k\in(0,1)$ are given, $s_k$ is the standard deviation of $Y_k$, and $\epsilon_1,\dots,\epsilon_{100}$ are i.i.d.\ $N(0,1)$ and independent of $\Theta$. Default occurs when the asset return falls below a threshold, $I_k=\ind_{\{Y_k\le d_k\}}$, as in Merton's model (Appendix~A). We write $\mu=\E[\Theta]$ and $\Sigma=\Cov(\Theta)$.
+
+\subsection{CONDITIONAL DEFAULT PROBABILITY (QUESTION I)}
+Fix a realisation $\Theta=\theta$. Since $\sqrt{1-\lambda_k}\,s_k>0$,
+\[
+Y_k\le d_k \iff \epsilon_k \le \frac{d_k-\sqrt{\lambda_k}\,a_k'\theta}{\sqrt{1-\lambda_k}\,s_k}.
+\]
+Because $\epsilon_k\sim N(0,1)$ is independent of $\Theta$, conditioning on $\Theta=\theta$ does not change its distribution, and therefore
+\begin{equation}
+\label{eq:condpd}
+p_k(\theta) := \P[I_k=1\mid \Theta=\theta] = \Phi\!\left(\frac{d_k-\sqrt{\lambda_k}\,a_k'\theta}{\sqrt{1-\lambda_k}\,s_k}\right),
+\end{equation}
+where $\Phi$ is the standard normal distribution function. \emph{Conditionally on $\Theta$, the indicator $I_k$ is Bernoulli distributed with parameter $p_k(\Theta)$.} Moreover, given $\Theta$ the indicators $I_1,\dots,I_{100}$ are functions of the independent variables $\epsilon_1,\dots,\epsilon_{100}$ only, hence they are conditionally independent: the model is a Bernoulli mixture model \citep[Sect.~8.4]{McNeil05}. Unconditionally, by the law of iterated expectations,
+\begin{equation}
+\label{eq:uncond}
+\pi_k=\P[Y_k\le d_k]=\E\big[p_k(\Theta)\big],
+\end{equation}
+and for $j\neq k$ the joint default probability is $\E[p_j(\Theta)p_k(\Theta)]$, so default correlation arises only through the common dependence of $p_j$ and $p_k$ on $\Theta$. The function $p_k$ is decreasing in $a_k'\theta$ whenever $a_k\ge 0$, which is the case for every counterparty in the data: a fall of the two indices raises all default probabilities at once.
+
+\subsection{PORTFOLIO LOSS (QUESTION II)}
+If counterparty $k$ defaults the lender loses the exposure net of recovery, $E_k(1-R_k)$, and nothing otherwise. The portfolio loss over the horizon is therefore
+\begin{equation}
+\label{eq:loss}
+L=\sum_{k=1}^{100}E_k\,(1-R_k)\,I_k .
+\end{equation}
+Its expectation, $\E[L]=\sum_k E_k(1-R_k)\pi_k$, depends only on the marginal default probabilities and is the same for every model of $\Theta$ that satisfies (\ref{eq:uncond}). Conditionally on $\Theta$, $L$ is a sum of independent scaled Bernoulli variables with
+\begin{equation}
+\label{eq:condloss}
+\begin{aligned}
+\E[L\mid\Theta]&=\sum_k E_k(1-R_k)\,p_k(\Theta),\\
+\Var[L\mid\Theta]&=\sum_k E_k^2(1-R_k)^2\,p_k(\Theta)\big(1-p_k(\Theta)\big).
+\end{aligned}
+\end{equation}
+The first quantity is the loss of an infinitely granular portfolio with the same systematic risk; we use it in Sections~\ref{sec:results} and \ref{sec:irb} to separate systematic risk from name concentration.
+
+\subsection{STANDARD DEVIATION OF $Y_k$ (QUESTION III)}
+Since $\epsilon_k$ is independent of $\Theta$ and has unit variance, (\ref{eq:Yk}) gives
+\[
+\Var(Y_k)=\lambda_k\,a_k'\Sigma a_k+(1-\lambda_k)\,s_k^2 .
+\]
+By definition $s_k^2=\Var(Y_k)$. Substituting and rearranging, $\lambda_k s_k^2=\lambda_k a_k'\Sigma a_k$, and since $\lambda_k>0$,
+\begin{equation}
+\label{eq:sk}
+s_k=\sqrt{a_k'\Sigma a_k}=\sqrt{a_{k1}^2\sigma_1^2+2a_{k1}a_{k2}\rho\sigma_1\sigma_2+a_{k2}^2\sigma_2^2},
+\end{equation}
+where $\sigma_i^2=\Var(\Theta_i)$ and $\rho=\Corr(\Theta_1,\Theta_2)$. The standard deviation of the asset return equals that of the factor combination $a_k'\Theta$, and $\lambda_k$ is the share of the variance of $Y_k$ that is systematic.
+
+\subsection{TWO CONSEQUENCES}
+Two implications of (\ref{eq:sk}) are used repeatedly below. First, for $j\ne k$,
+\begin{equation}
+\label{eq:assetcorr}
+\Corr(Y_j,Y_k)=\sqrt{\lambda_j\lambda_k}\;\frac{a_j'\Sigma a_k}{s_js_k}=\sqrt{\lambda_j\lambda_k}\;\Corr(a_j'\Theta,a_k'\Theta),
+\end{equation}
+so $\sqrt{\lambda_k}$ plays the role of the loading on the systematic factor in a one-factor model. Second, the default event is unchanged if $Y_k$ and $d_k$ are both shifted and rescaled. Writing $V_k=a_k'(\Theta-\mu)/s_k$, which has mean zero and unit variance,
+\begin{equation}
+\label{eq:standardised}
+Y_k\le d_k\iff \sqrt{\lambda_k}\,V_k+\sqrt{1-\lambda_k}\,\epsilon_k\le d_k^{*},\quad d_k^{*}=\frac{d_k-\sqrt{\lambda_k}\,a_k'\mu}{s_k}.
+\end{equation}
+Once $d_k$ is calibrated to a given $\pi_k$, the loss distribution depends on the law of $\Theta$ only through the joint law of the standardised combinations $(V_1,\dots,V_{100})$. The level of the mean and of the volatility of the indices is irrelevant; what matters is the \emph{shape} of the factor distribution (skewness, kurtosis, dependence) and the ratio $\sigma_1/\sigma_2$. This invariance has a practical consequence for the horizon. The portfolio file reports $\pi_k$ as one-year default probabilities, and the assignment applies them to $T=1$ week through the condition $\P[Y_k\le d_k]=\pi_k$. Because of (\ref{eq:standardised}), after this calibration the horizon enters the results only through the non-normality of weekly returns; we therefore use the $\pi_k$ as given, which also keeps the comparison with the one-year IRB formula in Section~\ref{sec:irb} like for like.

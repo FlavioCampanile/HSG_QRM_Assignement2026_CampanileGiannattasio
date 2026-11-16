@@ -1,0 +1,70 @@
+% =====================================================================
+% 6. Simulation design -- questions (v), (vi), (vii)
+% =====================================================================
+\section{Simulation Design (Questions v--vii)}
+\label{sec:simulation}
+
+\subsection{SIMULATING $\Theta$ AND $Y_k$}
+One scenario consists of a draw of $\Theta$ and of $100$ independent $N(0,1)$ variables $\epsilon_1,\dots,\epsilon_{100}$, combined through (\ref{eq:Yk}) with $s_k$ from (\ref{eq:sk}) and the covariance matrix of the model at hand. The factor draws are generated as follows.
+\begin{description}
+\item[M1] Draw an index $t$ uniformly on $\{1,\dots,n\}$ and set $\Theta=\theta_t$ (sampling rows with replacement).
+\item[M2] Draw $Z=(Z_1,Z_2)'$ with independent $N(0,1)$ components and set $\Theta=\hat\mu+A'Z$, where $A$ is the upper-triangular Cholesky factor with $A'A=\hat\Sigma$ (assignment, Section~6.3.2).
+\item[M3] Draw $Z\sim N(0,P)$ with $P$ the correlation matrix with off-diagonal element $\hat\rho$, and independently $W\sim\chi^2_{\hat\nu}$. Then $X=\sqrt{\hat\nu/W}\,Z$ is bivariate $t$ (assignment, Section~6.3.3), $U_i=t_{\hat\nu}(X_i)$ is uniform, and $(U_1,U_2)$ has the $t$-copula. By the quantile transformation (assignment, Section~6.3.1), $\Theta_i=\hat\mu_i+\hat\sigma_i\Phi^{-1}(U_i)$ has the required Gaussian margin.
+\end{description}
+We use $N=10{,}000$ scenarios per model, as requested, with a fixed seed. The three models are simulated from the \emph{same} primitive random numbers (common random numbers; details in Appendix~B). This does not change the distribution of any single model. It is a variance-reduction device for \emph{differences} between models: at the $99.9\%$ level a risk measure depends on about ten scenarios, and with independent streams a difference between two models would mostly reflect which scenarios each stream happened to contain.
+
+\subsection{THRESHOLDS (QUESTIONS V AND VI)}
+The threshold must satisfy $\P[Y_k\le d_k]=\pi_k$.
+
+\paragraph{The empirical quantile.}
+With $N$ simulated values of $Y_k$ the probability is the empirical distribution function, and the threshold is its generalised inverse at $\pi_k$, the empirical $\pi_k$-quantile:
+\begin{equation}
+\label{eq:dhat}
+\dhat=\inf\Big\{y:\ \tfrac1N\textstyle\sum_{j=1}^N\ind_{\{Y_k^{(j)}\le y\}}\ge\pi_k\Big\}=Y_{k,(\lceil N\pi_k\rceil)},
+\end{equation}
+where $Y_{k,(1)}\le\dots\le Y_{k,(N)}$ are the ordered draws. This is our answer to questions (v) and (vi). By construction counterparty $k$ defaults in exactly $\lceil N\pi_k\rceil$ of the $N$ scenarios, and $N\pi_k$ is an integer for all seven rating classes. The simulated default frequency therefore equals $\pi_k$ exactly, and the average simulated loss equals the expected loss of USD~\val{q5.EL|usd} to the cent under all three models.
+
+\paragraph{Its limitation.}
+The estimator rests on $\lceil N\pi_k\rceil$ observations (Table~\ref{tab:thr}): one for AAA, where $\dhat$ is the smallest of the $10{,}000$ simulated values, three for AA and seven for A, against $500$ for B and $2{,}000$ for CCC. For \val{q5.n_names_k_le_7|int} of the 100 names the threshold is thus an extreme order statistic, which matches $\pi_k$ in the sample but is a noisy estimate of the $\pi_k$-quantile of the model. The default probability that $\dhat$ implies under the model, $\P[Y_k\le d\,]$ evaluated at $d=\dhat$ without simulation error, ranges from \val{q5.checks.M2.pd_ratio_quantile_min|f2} to \val{q5.checks.M2.pd_ratio_quantile_max|f2} times $\pi_k$ under M2, from \val{q5.checks.M1.pd_ratio_quantile_min|f2} to \val{q5.checks.M1.pd_ratio_quantile_max|f2} under M1 and from \val{q5.checks.M3.pd_ratio_quantile_min|f2} to \val{q5.checks.M3.pd_ratio_quantile_max|f2} under M3 (last columns of Table~\ref{tab:thr}; Figure~\ref{fig:thr}). The error is concentrated in the names that matter least for the portfolio: for the B and CCC names, which generate \val{q5.EL_share_B_CCC|pct0}\% of the expected loss, the implied default probability is within \val{q5.checks.M2.pd_ratio_quantile_min_BtoCCC|f2}--\val{q5.checks.M2.pd_ratio_quantile_max_BtoCCC|f2} of the target under M2 and closer under M1 and M3.
+
+\paragraph{A threshold without simulation error.}
+The condition $\P[Y_k\le d_k]=\pi_k$ can also be imposed on the model itself and not on a sample from it. By (\ref{eq:uncond}) it reads $\E[p_k(\Theta;d_k)]=\pi_k$: the idiosyncratic shock is integrated out analytically through (\ref{eq:condpd}), and only the expectation over $\Theta$ remains. We call the solution the \emph{reference threshold} $d_k$.
+\begin{description}
+\item[M2] $Y_k$ is exactly Gaussian with mean $\sqrt{\lambda_k}a_k'\mu$ and variance $s_k^2$, so $d_k=\sqrt{\lambda_k}\,a_k'\mu+s_k\,\Phi^{-1}(\pi_k)$, i.e.\ $d_k^*=\Phi^{-1}(\pi_k)$.
+\item[M1] The expectation is a finite average over the $n$ observed weeks, and $d_k$ is the unique root of
+\[
+\frac1n\sum_{t=1}^n\Phi\!\left(\frac{d_k-\sqrt{\lambda_k}\,a_k'\theta_t}{\sqrt{1-\lambda_k}\,s_k}\right)=\pi_k ,
+\]
+which is exact for the empirical distribution.
+\item[M3] Write $\Theta_i=\hat\mu_i+\hat\sigma_iG_i$. By (\ref{eq:m3dens}) the pair $(G_1,G_2)$ has the density $c_{\nu,\rho}(\Phi(g_1),\Phi(g_2))\,\varphi(g_1)\varphi(g_2)$, known in closed form, so the expectation is a two-dimensional integral. We compute it with the trapezoidal rule on a regular grid with step $0.1$ over $[-8.5,8.5]^2$ (\val{q5.quad_points_M3|int} nodes with non-negligible weight). The weights sum to one up to $10^{-13}$, and a grid five times finer changes the implied default probabilities by less than $10^{-5}$ in relative terms. A simulated sample from M3 is a poor substitute here: with $65{,}536$ quasi-random draws the implied default probabilities are still off by up to 3\%, and with $4{,}096$ by more than 70\%, because very few draws fall in the region that determines a default probability of one basis point.
+\end{description}
+In all cases the left-hand side is increasing in $d_k$, and the root is found by a safeguarded Newton iteration.
+
+\paragraph{How the two are used.}
+The two thresholds answer the same condition and have different merits. The empirical quantile $\dhat$ is what the assignment asks for and reproduces $\pi_k$ exactly in the sample. The reference threshold $d_k$ gives every counterparty exactly the default probability $\pi_k$ under each model, which is the premise of the comparison between M1, M2 and M3, and it does not depend on the simulated sample. We therefore report the results of the assignment run ($N=10{,}000$) with $\dhat$ and, next to them, with $d_k$; the reference run of Section~\ref{sec:results} and the rolling analysis of Section~\ref{sec:rolling}, whose purpose is to compare models and dates, use $d_k$. Section~\ref{sec:results} shows that the choice moves the $N=10{,}000$ VaR by less than its Monte Carlo error, and that at this sample size $\dhat$ gives the more precise VaR estimate of the two.
+
+\begin{table}[tb]
+\caption{Thresholds by rating class. $\lceil N\pi_k\rceil$: number of simulated values at or below $\dhat$ ($N=10{,}000$); $\bar d_k^{\,*}$: average standardised reference threshold (\ref{eq:standardised}); PD ratio: range across the counterparties of the class of the default probability implied by $\dhat$ divided by the target $\pi_k$.}
+\label{tab:thr}
+\centering
+\qrmtable{tab_thresholds}
+\end{table}
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_thresholds}
+\caption{Standardised thresholds: empirical quantile of $10{,}000$ simulated $Y_k$ against the reference value, one point per counterparty.}
+\label{fig:thr}
+\end{figure}
+
+Table~\ref{tab:thr} also shows how the models differ in the thresholds themselves. Under M2 the standardised threshold is $\Phi^{-1}(\pi_k)$, for instance $-3.72$ for AAA. Under M1 it is much lower for good ratings (about $-5.1$ for AAA): with fat-tailed factors a one-basis-point default probability is reached only at a far more extreme asset return. For CCC names the ordering is reversed, because a leptokurtic distribution has less mass than the Gaussian at moderate distances from the mean. Under M3 the thresholds are within $0.02$ of the Gaussian ones.
+
+\subsection{LOSS DISTRIBUTION (QUESTION VII)}
+For every scenario the default indicators $I_k=\ind_{\{Y_k\le \dhat\}}$ are inserted into (\ref{eq:loss}), which gives $10{,}000$ realisations of the portfolio loss under each model. Figure~\ref{fig:hist} shows the three simulated distributions. They are indistinguishable in the body, with a mode at zero and a mean equal to the expected loss, and they separate only in the far right tail, where M1 puts visibly more mass.
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_loss_hist}
+\caption{Simulated distribution of the portfolio loss, $N=10{,}000$ scenarios per model, thresholds $\dhat$ (logarithmic vertical axis).}
+\label{fig:hist}
+\end{figure}

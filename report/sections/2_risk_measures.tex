@@ -1,0 +1,15 @@
+% =====================================================================
+% 2. Risk measures (lecture notes, Chapter 1)
+% =====================================================================
+\section{Risk Measures}
+\label{sec:riskmeasures}
+
+We use the definitions of Chapter~1 of the lecture notes \citep{DeGiorgi26}. Let $L\ge0$ denote the portfolio loss over the horizon, $X=-L$ the corresponding profit and loss, and $\alpha\in(0,1)$ the confidence level. Value-at-risk is the negative of the $(1-\alpha)$-quantile of $X$, and expected shortfall averages the losses beyond it:
+\begin{align}
+\VaR_\alpha(X)&=-\inf\{x\in\mathbb{R}:\P[X\le x]\ge 1-\alpha\},\label{eq:var}\\
+\ES_\alpha(X)&=\frac{1}{1-\alpha}\Big\{\E\big[-X\,\ind_{\{X\le-\VaR_\alpha(X)\}}\big]\notag\\
+&\qquad\qquad-\VaR_\alpha(X)\big(\P[X\le-\VaR_\alpha(X)]-(1-\alpha)\big)\Big\}.\label{eq:es}
+\end{align}
+The second term in (\ref{eq:es}) vanishes when $X$ has a continuous distribution, in which case ES is the tail conditional expectation $-\E[X\mid X\le-\VaR_\alpha(X)]$. It matters here because the loss of a portfolio of $100$ names is discrete, and it is what makes ES coherent for any distribution, whereas VaR is not subadditive in general.
+
+The unexpected loss is $\UL_\alpha=\VaR_\alpha-\E[L]$, the quantity that regulatory capital is meant to cover. We use $\alpha=99.9\%$ throughout, the level of the Basel IRB approach.
