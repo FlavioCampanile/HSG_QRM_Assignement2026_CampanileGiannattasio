@@ -8,8 +8,8 @@
 The market file contains daily levels of the SPI and of the SPX. Five features of the raw data required a decision.
 \begin{itemize}
 \item \emph{Type of index.} The SPX series is at about $13{,}000$ points in January 2025, which is consistent with the S\&P~500 \emph{total return} index and not with the price index (below $6{,}000$ at that date). Since the SPI is a total-return index by construction, both series include dividends, which is the consistent choice for asset-value returns.
-\item \emph{Start of the sample.} The file starts in 1987/88 although the assignment states 1 January 2000. We use the sample from 1 January 2000, as stated in the assignment. The SPI sheet opens with twelve monthly values for 1987 before the daily series begins on 4 January 1988; they are not daily observations and are discarded in any case.
-\item \emph{End of the sample.} The series end on \val{q4.raw_last_SPX|date} (SPX) and \val{q4.raw_last_SPI|date} (SPI), not on 31 October 2026 as stated in the assignment. We use all common observations, the last one being \val{q4.last_day|date}.
+\item \emph{Start of the sample.} The raw file begins in 1987/88. We start the sample on 1 January 2000: this gives a common, fully daily window for both indices that still covers several distinct stress episodes (the end of the dot-com boom, 2008, 2011, March 2020 and 2022). The twelve monthly SPI values for 1987 at the top of the file are not daily observations and would be discarded in any case.
+\item \emph{End of the sample.} The series end on \val{q4.raw_last_SPX|date} (SPX) and \val{q4.raw_last_SPI|date} (SPI). We use all common observations, the last one being \val{q4.last_day|date}.
 \item \emph{Calendars.} The two markets have different holiday calendars. We keep only the \val{q4.n_days|int} days on which both indices are quoted, so that no return combines a fresh price with a stale one.
 \item \emph{Asynchronous closing.} The Swiss market closes several hours before the US market. This biases daily correlations downwards, but is of minor importance at the weekly frequency.
 \end{itemize}

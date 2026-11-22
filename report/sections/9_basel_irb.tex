@@ -1,11 +1,12 @@
 % =====================================================================
 % 9. Comparison with the Basel IRB approach -- question (x)
 % =====================================================================
-\section{Comparison with the Basel IRB Approach (Question x)}
+\section{Comparison with the Basel IRB Approach}
 \label{sec:irb}
 
 \subsection{REGULATORY CORRELATION, CAPITAL CHARGE AND MATURITY ADJUSTMENT}
-For each counterparty we evaluate the formulas of Section~6.4 of the assignment with $\mathrm{AVC}=1$ and $M=1$:
+\label{subsec:irbcap}
+For each counterparty we evaluate the IRB risk-weight formulas \citep{BCBS05}, treating every obligor as a non-financial corporate ($\mathrm{AVC}=1$) with an effective maturity of $M=1$ year:
 \begin{align*}
 \rho_k&=0.12\,w_k+0.24\,(1-w_k),\qquad w_k=\frac{1-e^{-50\pi_k}}{1-e^{-50}},\\
 K_k&=(1-R_k)\left[\Phi\!\left(\frac{\Phi^{-1}(\pi_k)+\sqrt{\rho_k}\,\Phi^{-1}(0.999)}{\sqrt{1-\rho_k}}\right)-\pi_k\right]\mathrm{MA}(\pi_k,M).
@@ -34,6 +35,7 @@ K=\sum_{k=1}^{100}E_kK_k=\text{USD }\val{q10.K|usd},\quad \mathrm{RWA}=12.5\,K=\
 $K$ is \val{q10.K_pct|pct2}\% of total exposure. The classes B and CCC account for \val{derived.K_share_B_CCC|pct0}\% of it.
 
 \subsection{WHY THE IRB CAPITAL DIFFERS FROM THE MODEL-BASED UNEXPECTED LOSS}
+\label{subsec:irbgap}
 \begin{table}[tb]
 \caption{From the IRB capital to the model-based unexpected loss at $99.9\%$ (reference run).}
 \label{tab:gap}
@@ -59,6 +61,7 @@ The unexpected loss is USD~\val{q8.M2.UL_ref|usd} under M2 and USD~\val{q8.M3.UL
 \end{enumerate}
 
 \subsection{WHY A REGULATOR MAY PREFER THE SIMPLER FORMULA}
+\label{subsec:irbpref}
 The IRB formula has properties that a portfolio model lacks and that matter for regulation.
 \begin{itemize}
 \item \emph{Portfolio invariance.} Under the single-factor, infinitely granular assumptions the capital for a loan depends only on its own characteristics and not on the rest of the portfolio \citep{Gordy03}. Capital is additive, $K=\sum_kE_kK_k$, can be computed loan by loan, and translates directly into risk weights. In a portfolio model the contribution of a loan depends on every other position.

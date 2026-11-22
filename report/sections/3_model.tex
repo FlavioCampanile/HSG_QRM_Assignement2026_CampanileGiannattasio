@@ -1,7 +1,7 @@
 % =====================================================================
 % 3. The credit portfolio model -- theory questions (i), (ii), (iii)
 % =====================================================================
-\section{The Credit Portfolio Model (Questions i--iii)}
+\section{The Credit Portfolio Model}
 \label{sec:model}
 
 \subsection{SETTING}
@@ -12,7 +12,8 @@ Y_k = \sqrt{\lambda_k}\, a_k'\Theta + \sqrt{1-\lambda_k}\, s_k\, \epsilon_k ,
 \end{equation}
 where $\Theta=(\Theta_1,\Theta_2)'$ are the weekly log-returns of SPI and SPX, $a_k\in\mathbb{R}^2$ and $\lambda_k\in(0,1)$ are given, $s_k$ is the standard deviation of $Y_k$, and $\epsilon_1,\dots,\epsilon_{100}$ are i.i.d.\ $N(0,1)$ and independent of $\Theta$. Default occurs when the asset return falls below a threshold, $I_k=\ind_{\{Y_k\le d_k\}}$, as in Merton's model (Appendix~A). We write $\mu=\E[\Theta]$ and $\Sigma=\Cov(\Theta)$.
 
-\subsection{CONDITIONAL DEFAULT PROBABILITY (QUESTION I)}
+\subsection{CONDITIONAL DEFAULT PROBABILITY}
+\label{subsec:condpd}
 Fix a realisation $\Theta=\theta$. Since $\sqrt{1-\lambda_k}\,s_k>0$,
 \[
 Y_k\le d_k \iff \epsilon_k \le \frac{d_k-\sqrt{\lambda_k}\,a_k'\theta}{\sqrt{1-\lambda_k}\,s_k}.
@@ -29,7 +30,8 @@ where $\Phi$ is the standard normal distribution function. \emph{Conditionally o
 \end{equation}
 and for $j\neq k$ the joint default probability is $\E[p_j(\Theta)p_k(\Theta)]$, so default correlation arises only through the common dependence of $p_j$ and $p_k$ on $\Theta$. The function $p_k$ is decreasing in $a_k'\theta$ whenever $a_k\ge 0$, which is the case for every counterparty in the data: a fall of the two indices raises all default probabilities at once.
 
-\subsection{PORTFOLIO LOSS (QUESTION II)}
+\subsection{PORTFOLIO LOSS}
+\label{subsec:loss}
 If counterparty $k$ defaults the lender loses the exposure net of recovery, $E_k(1-R_k)$, and nothing otherwise. The portfolio loss over the horizon is therefore
 \begin{equation}
 \label{eq:loss}
@@ -45,7 +47,8 @@ Its expectation, $\E[L]=\sum_k E_k(1-R_k)\pi_k$, depends only on the marginal de
 \end{equation}
 The first quantity is the loss of an infinitely granular portfolio with the same systematic risk; we use it in Sections~\ref{sec:results} and \ref{sec:irb} to separate systematic risk from name concentration.
 
-\subsection{STANDARD DEVIATION OF $Y_k$ (QUESTION III)}
+\subsection{STANDARD DEVIATION OF $Y_k$}
+\label{subsec:sk}
 Since $\epsilon_k$ is independent of $\Theta$ and has unit variance, (\ref{eq:Yk}) gives
 \[
 \Var(Y_k)=\lambda_k\,a_k'\Sigma a_k+(1-\lambda_k)\,s_k^2 .
@@ -68,4 +71,4 @@ so $\sqrt{\lambda_k}$ plays the role of the loading on the systematic factor in 
 \label{eq:standardised}
 Y_k\le d_k\iff \sqrt{\lambda_k}\,V_k+\sqrt{1-\lambda_k}\,\epsilon_k\le d_k^{*},\quad d_k^{*}=\frac{d_k-\sqrt{\lambda_k}\,a_k'\mu}{s_k}.
 \end{equation}
-Once $d_k$ is calibrated to a given $\pi_k$, the loss distribution depends on the law of $\Theta$ only through the joint law of the standardised combinations $(V_1,\dots,V_{100})$. The level of the mean and of the volatility of the indices is irrelevant; what matters is the \emph{shape} of the factor distribution (skewness, kurtosis, dependence) and the ratio $\sigma_1/\sigma_2$. This invariance has a practical consequence for the horizon. The portfolio file reports $\pi_k$ as one-year default probabilities, and the assignment applies them to $T=1$ week through the condition $\P[Y_k\le d_k]=\pi_k$. Because of (\ref{eq:standardised}), after this calibration the horizon enters the results only through the non-normality of weekly returns; we therefore use the $\pi_k$ as given, which also keeps the comparison with the one-year IRB formula in Section~\ref{sec:irb} like for like.
+Once $d_k$ is calibrated to a given $\pi_k$, the loss distribution depends on the law of $\Theta$ only through the joint law of the standardised combinations $(V_1,\dots,V_{100})$. The level of the mean and of the volatility of the indices is irrelevant; what matters is the \emph{shape} of the factor distribution (skewness, kurtosis, dependence) and the ratio $\sigma_1/\sigma_2$. This invariance has a practical consequence for the horizon. The portfolio file reports $\pi_k$ as one-year default probabilities, and we impose them at $T=1$ week through the condition $\P[Y_k\le d_k]=\pi_k$. This is a deliberate choice. Because of (\ref{eq:standardised}), after this calibration the horizon enters the results only through the non-normality of weekly returns: rescaling $\pi_k$ to one week would change the level of risk but not the comparison between factor models, which is our object. Using the $\pi_k$ as given also keeps the comparison with the one-year IRB formula in Section~\ref{sec:irb} like for like.

@@ -1,5 +1,5 @@
 % =====================================================================
-% Appendix A (Merton), B (Monte Carlo design), C (code)
+% Appendix A (Merton), B (Monte Carlo design), C (code), D (course brief)
 % Unnumbered headings, as in the course template; referred to in the
 % text as "Appendix A/B/C".
 % =====================================================================
@@ -11,20 +11,52 @@ In Merton's model \citep[Ch.~2]{DeGiorgi26} a firm is financed by equity and by 
 \[
 V_{k,T}=V_{k,0}\exp\!\big((\mu_{V,k}-\tfrac12\sigma_{V,k}^2)T+\sigma_{V,k}W_{k,T}\big).
 \]
-The firm defaults if its assets are worth less than its debt at maturity, $V_{k,T}\le B_k$. Taking logarithms, default occurs if and only if the asset-value log-return $Y_k=\log(V_{k,T}/V_{k,0})$ is at or below $d_k=\log(B_k/V_{k,0})$: this is the representation $I_k=\ind_{\{Y_k\le d_k\}}$ of Section~\ref{sec:model}, with $d_k$ a measure of leverage. In the original model $Y_k$ is Gaussian and the default probability is $\Phi\big((d_k-(\mu_{V,k}-\frac12\sigma_{V,k}^2)T)/(\sigma_{V,k}\sqrt T)\big)$. The model of the assignment keeps the threshold structure and changes two things. It specifies the dependence between firms through a factor decomposition of $Y_k$ \citep[Sect.~8.3]{McNeil05}, and it does not require $Y_k$ to be Gaussian, since the factors $\Theta$ may follow M1, M2 or M3. Because neither asset values nor debt levels are observed, $d_k$ is not computed from a balance sheet but calibrated to the default probability of the rating class, as in the industry implementations of the model.
+The firm defaults if its assets are worth less than its debt at maturity, $V_{k,T}\le B_k$. Taking logarithms, default occurs if and only if the asset-value log-return $Y_k=\log(V_{k,T}/V_{k,0})$ is at or below $d_k=\log(B_k/V_{k,0})$: this is the representation $I_k=\ind_{\{Y_k\le d_k\}}$ of Section~\ref{sec:model}, with $d_k$ a measure of leverage. In the original model $Y_k$ is Gaussian and the default probability is $\Phi\big((d_k-(\mu_{V,k}-\frac12\sigma_{V,k}^2)T)/(\sigma_{V,k}\sqrt T)\big)$. Our model keeps the threshold structure and changes two things. It specifies the dependence between firms through a factor decomposition of $Y_k$ \citep[Sect.~8.3]{McNeil05}, and it does not require $Y_k$ to be Gaussian, since the factors $\Theta$ may follow M1, M2 or M3. Because neither asset values nor debt levels are observed, $d_k$ is not computed from a balance sheet but calibrated to the default probability of the rating class, as in the industry implementations of the model.
 
 \subsection*{B. MONTE CARLO DESIGN}
 \paragraph{Common random numbers.}
 One scenario is built from the primitive draws $(Z_1,Z_2,U_W,U_B,\epsilon_1,\dots,\epsilon_{100})$, where $Z_1,Z_2,\epsilon_k$ are independent $N(0,1)$ and $U_W,U_B$ independent uniforms. The same pair $(Z_1,Z_2)$ enters the Cholesky step of M2 and of M3; the mixing variable of M3 is obtained by inversion, $W=F^{-1}_{\chi^2_{\hat\nu}}(U_W)$; M1 selects the historical week with index $\lceil nU_B\rceil$; and the idiosyncratic shocks $\epsilon_k$ are identical under the three models. M2 and M3 therefore see the same Gaussian shocks and differ only through their parameters and the mixing variable, while M1 can share only the idiosyncratic shocks. All generators are seeded.
 
 \paragraph{Reference run.}
-The reference run consists of $2{,}000{,}000$ scenarios per model, generated in $200$ blocks of $10{,}000$ with common random numbers and evaluated with the reference thresholds. The blocks serve as independent replications of the assignment's experiment (Section~\ref{sec:results}), and the same scenarios are reused for the climate overlay (Section~\ref{sec:climate}).
+The reference run consists of $2{,}000{,}000$ scenarios per model, generated in $200$ blocks of $10{,}000$ with common random numbers and evaluated with the reference thresholds. The blocks serve as independent replications of the baseline experiment (Section~\ref{sec:results}), and the same scenarios are reused for the climate overlay (Section~\ref{sec:climate}).
 
 \paragraph{Placebo experiment.}
 The placebo model of Section~\ref{sec:rolling} is M3 with the means, volatilities and correlation of M2 and $\nu=200$. Its VaR and ES are compared with those of M2 exactly as in one rolling window ($50{,}000$ scenarios, common random numbers, thresholds by quadrature with step $0.2$), for $200$ independent seeds at the full-sample parameters. A mean difference close to zero (\val{q9.placebo.VaR_mean|spct2}\% for VaR; the placebo copula is not exactly Gaussian) shows that the thresholds introduce no material systematic difference between the two models. Repeating the experiment with the actual full-sample M3, whose VaR exceeds that of M2 by \val{q8.M3.VaR_vs_M2|pct1}\% in the reference run, gives a measured difference with mean \val{q9.placebo.M3_VaR_mean|spct1}\% and standard deviation \val{q9.placebo.M3_VaR_sd|pct1}\%, negative for \val{q9.placebo.M3_VaR_share_neg|pct0}\% of the seeds: even $50{,}000$ scenarios do not reliably recover the sign of an effect of this size.
 
 \paragraph{Storm years.}
-The assignment run of Section~\ref{sec:climate} draws $N_e\sim\mathrm{Poisson}(f_e)$ event by event, as prescribed. For the re-draws and the reference run we use an equivalent and faster sampler: by the superposition property of Poisson variables, independent counts $N_e$ with means $f_e$ have the same law as a total number of events $M\sim\mathrm{Poisson}(\sum_ef_e)$ whose identities are drawn independently with probabilities $f_e/\sum_{e'}f_{e'}$. Both samplers reproduce the exact expectation implied by (\ref{eq:worstlaw}) in our tests.
+The baseline run of Section~\ref{sec:climate} draws $N_e\sim\mathrm{Poisson}(f_e)$ event by event. For the re-draws and the reference run we use an equivalent and faster sampler: by the superposition property of Poisson variables, independent counts $N_e$ with means $f_e$ have the same law as a total number of events $M\sim\mathrm{Poisson}(\sum_ef_e)$ whose identities are drawn independently with probabilities $f_e/\sum_{e'}f_{e'}$. Both samplers reproduce the exact expectation implied by (\ref{eq:worstlaw}) in our tests.
 
 \subsection*{C. CODE}
-\sloppy The analysis is written in Python and attached as a zip archive. The package \texttt{src/qrm} contains one module per task: \texttt{data.py} (loading, cleaning, weekly returns), \texttt{factor\_models.py} (M1--M3: estimation and simulation), \texttt{credit\_model.py} ($s_k$, thresholds, conditional default probabilities, losses), \texttt{risk\_measures.py} (VaR and ES), \texttt{rolling.py} (question ix), \texttt{basel\_irb.py} (question x), \texttt{climada\_io.py} (question xi: hazard and impact function from CLIMADA) and \texttt{climate.py} (question xi: storm years and overlay). The numbered scripts in \texttt{scripts/} reproduce every table and figure of this report in the order of the questions, and \texttt{run\_all.py} runs them in sequence. Only script \texttt{06} requires CLIMADA; it stores the frequencies and damage ratios in a file, so that the rest of the analysis runs without it. Every number quoted in the text is read from the output of the scripts when the report is built. Numerical optimisation uses SciPy; the likelihoods, the simulation algorithms and the risk-measure estimators are implemented explicitly and follow the formulas derived in the text.
+\sloppy The analysis is written in Python and attached as a zip archive. The package \texttt{src/qrm} contains one module per component of the analysis: \texttt{data.py} (loading, cleaning, weekly returns), \texttt{factor\_models.py} (M1--M3: estimation and simulation), \texttt{credit\_model.py} ($s_k$, thresholds, conditional default probabilities, losses), \texttt{risk\_measures.py} (VaR and ES), \texttt{rolling.py} (Section~\ref{sec:rolling}), \texttt{basel\_irb.py} (Section~\ref{sec:irb}), \texttt{climada\_io.py} (Section~\ref{sec:climate}: hazard and impact function from CLIMADA) and \texttt{climate.py} (storm years and overlay). The numbered scripts in \texttt{scripts/} reproduce every table and figure of this report in the order of the sections, and \texttt{run\_all.py} runs them in sequence. Only script \texttt{06} requires CLIMADA; it stores the frequencies and damage ratios in a file, so that the rest of the analysis runs without it. Every number quoted in the text is read from the output of the scripts when the report is built. Numerical optimisation uses SciPy; the likelihoods, the simulation algorithms and the risk-measure estimators are implemented explicitly and follow the formulas derived in the text.
+
+\subsection*{D. RELATION TO THE COURSE BRIEF}
+The portfolio, the data and the model setting (\ref{eq:Yk}) are taken from the course brief \citep{DeGiorgiFilkova26}. Table~\ref{tab:map} indicates where each of its items is addressed.
+
+\begin{table}[htb]
+\caption{Correspondence between the items of the course brief and the paper.}
+\label{tab:map}
+\centering
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{0.52\textwidth}l@{}}
+\toprule
+Item & Content & Where \\
+\midrule
+(i) & Conditional default probability; law of $I_k$ given $\Theta$ & Sect.~\ref{subsec:condpd}, eq.~(\ref{eq:condpd}) \\
+(ii) & Portfolio loss & Sect.~\ref{subsec:loss}, eq.~(\ref{eq:loss}) \\
+(iii) & Standard deviation of $Y_k$ & Sect.~\ref{subsec:sk}, eq.~(\ref{eq:sk}) \\
+(iv) & ML estimation of M2 and M3 & Sect.~\ref{sec:factormodels}, Table~\ref{tab:mle} \\
+(v)--(vi) & Simulation of $Y_k$; thresholds $d_k$ & Sect.~\ref{subsec:simtheta}--\ref{subsec:thresholds}, Table~\ref{tab:thr} \\
+(vii) & Portfolio loss distribution & Sect.~\ref{subsec:lossdist}, Figure~\ref{fig:hist} \\
+(viii) & $99.9\%$ VaR and ES, comparison & Sect.~\ref{sec:results}, Tables~\ref{tab:var}--\ref{tab:varx} \\
+(ix) & VaR and ES on rolling 500-day windows & Sect.~\ref{sec:rolling}, Fig.~\ref{fig:rolling} \\
+(x) & $\rho_k$, $K_k$, meaning of $\mathrm{MA}(\pi_k,1)$, $K$ and RWA & Sect.~\ref{subsec:irbcap}, Table~\ref{tab:irb} \\
+(x) & IRB capital vs.\ UL; regulator's view & Sect.~\ref{subsec:irbgap}--\ref{subsec:irbpref} \\
+(xi) & Interpretation of $\phi_k=0$ and $\phi_k=1$ & Sect.~\ref{subsec:phi} \\
+(xi) & Storm overlay: VaR and ES & Sect.~\ref{subsec:climresults}, Table~\ref{tab:clim} \\
+(xi) & More geographically diversified portfolio & Sect.~\ref{subsec:climvariants} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{What the paper adds.}
+Every item is answered as posed; the analysis goes further wherever an answer raised a question that the data could settle. \emph{Theory:} the asset-correlation formula (\ref{eq:assetcorr}) and the invariance property (\ref{eq:standardised}), which justify the horizon of $\pi_k$ and link the model to the IRB formula. \emph{Data:} identification of the SPX series as a total-return index, synchronised calendars, non-overlapping weekly returns, and joint tail exceedances that motivate M3 empirically. \emph{Estimation:} the full maximum-likelihood estimator of M3 beyond the two-step estimator, standard errors, the tail-dependence coefficient and a likelihood-ratio test corrected for the boundary of the parameter space. \emph{Simulation:} common random numbers, thresholds free of simulation error and a two-million-scenario reference run that attaches a standard error to every $99.9\%$ estimate and to every difference between models. \emph{Dynamics:} a placebo band for model differences and a point-in-time counterfactual with frozen thresholds. \emph{Regulation:} a step-by-step decomposition of the gap between IRB capital and unexpected loss. \emph{Climate:} closed-form expected damage and first-order effects on VaR and ES, an upper-bound sensitivity, five variants and a simulated diversified portfolio in place of a qualitative answer. Each extension supports a conclusion in the main text rather than being reported for its own sake.

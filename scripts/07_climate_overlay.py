@@ -288,7 +288,7 @@ def main():
     c2 = lambda x: f"{x:,.2f}"                               # USD with cents: the add-ons are a few dollars
     line = lambda k, cells: f"{k} & " + " & ".join(cells) + " \\\\"
     blocks = []
-    for title, src in (("Assignment run: $N=10{,}000$, thresholds $\\hat d_k$", num["assign"]),
+    for title, src in (("Baseline run: $N=10{,}000$, thresholds $\\hat d_k$", num["assign"]),
                        ("Reference run: $N=2{,}000{,}000$, thresholds $d_k$", num["ref"]["base"])):
         blocks.append(f"\\multicolumn{{7}}{{l}}{{\\emph{{{title}}}}} \\\\\n" + "\n".join(
             line(LAB[m], [u(src[m]["VaR_base"]), c2(src[m]["dVaR_usd"]), pp(src[m]["dVaR"]),

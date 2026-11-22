@@ -1,14 +1,14 @@
 % =====================================================================
 % 5. Factor models and maximum-likelihood estimation -- question (iv)
 % =====================================================================
-\section{Factor Models and Estimation (Question iv)}
+\section{Factor Models and Estimation}
 \label{sec:factormodels}
 
 \subsection{M1: EMPIRICAL DISTRIBUTION}
 Under M1, $\Theta$ takes each observed pair $\theta_t=(\theta_{t1},\theta_{t2})'$, $t=1,\dots,n$, with probability $1/n$. Nothing is estimated. Pairs are kept together, so the empirical dependence between the two indices is preserved. The moments of this distribution are the sample mean and the sample covariance with divisor $n$.
 
 \subsection{M2: BIVARIATE GAUSSIAN DISTRIBUTION}
-With the density of Section~6.1 of the assignment, the log-likelihood of an i.i.d.\ sample is
+For an i.i.d.\ sample from the bivariate Gaussian distribution with mean $\mu$ and covariance matrix $\Sigma$, the log-likelihood is
 \[
 \ell(\mu,\Sigma)=-n\log(2\pi)-\frac n2\log|\Sigma|-\frac12\sum_{t=1}^n(\theta_t-\mu)'\Sigma^{-1}(\theta_t-\mu).
 \]
@@ -25,7 +25,7 @@ Let $z_i=(\theta_i-\mu_i)/\sigma_i$ and $u_i=\Phi(z_i)$, and let $\varphi$ be th
 \label{eq:m3dens}
 f_\Theta(\theta_1,\theta_2)=c_{\nu,\rho}(u_1,u_2)\,\prod_{i=1}^2\frac{1}{\sigma_i}\,\varphi(z_i).
 \end{equation}
-The $t$-copula is the copula of the bivariate $t$ distribution of Section~6.2 of the assignment, $C_{\nu,\rho}(u_1,u_2)=F_{t,2}\big(t_\nu^{-1}(u_1),t_\nu^{-1}(u_2);\nu,\rho\big)$, where $F_{t,2}$ is the distribution function belonging to the density $f_{t,2}$ and $t_\nu$ is the univariate $t$ distribution function with density $f_{t,1}$. Differentiating with respect to $u_1$ and $u_2$, and using $\partial t_\nu^{-1}(u)/\partial u=1/f_{t,1}(t_\nu^{-1}(u);\nu)$, gives its density
+The $t$-copula is the copula of the standard bivariate $t$ distribution with $\nu$ degrees of freedom and correlation parameter $\rho$ \citep[Ch.~5]{McNeil05}, $C_{\nu,\rho}(u_1,u_2)=F_{t,2}\big(t_\nu^{-1}(u_1),t_\nu^{-1}(u_2);\nu,\rho\big)$, where $F_{t,2}$ is the distribution function belonging to the density $f_{t,2}$ and $t_\nu$ is the univariate $t$ distribution function with density $f_{t,1}$. Differentiating with respect to $u_1$ and $u_2$, and using $\partial t_\nu^{-1}(u)/\partial u=1/f_{t,1}(t_\nu^{-1}(u);\nu)$, gives its density
 \begin{equation}
 \label{eq:tcopdens}
 c_{\nu,\rho}(u_1,u_2)=\frac{f_{t,2}(x_1,x_2;\nu,\rho)}{f_{t,1}(x_1;\nu)\,f_{t,1}(x_2;\nu)},\quad x_i=t_\nu^{-1}(u_i)=t_\nu^{-1}\big(\Phi(z_i)\big).
@@ -38,13 +38,13 @@ The log-likelihood of the six parameters $\psi=(\mu_1,\mu_2,\sigma_1,\sigma_2,\r
 &+\log f_{t,2}(x_{t1},x_{t2};\nu,\rho)-\sum_{i=1}^2\log f_{t,1}(x_{ti};\nu)\Big\},
 \end{split}
 \end{equation}
-with, from Section~6.2 of the assignment,
+with the standard bivariate and univariate $t$ log-densities
 \begin{align*}
 \log f_{t,2}(x_1,x_2;\nu,\rho)&=\log\Gamma\big(\tfrac{\nu+2}2\big)-\log\Gamma\big(\tfrac\nu2\big)-\log(\pi\nu)-\tfrac12\log(1-\rho^2)\\
 &\quad-\tfrac{\nu+2}{2}\log\Big(1+\frac{x_1^2-2\rho x_1x_2+x_2^2}{\nu(1-\rho^2)}\Big),\\
 \log f_{t,1}(x;\nu)&=\log\Gamma\big(\tfrac{\nu+1}2\big)-\log\Gamma\big(\tfrac\nu2\big)-\tfrac12\log(\pi\nu)-\tfrac{\nu+1}2\log\Big(1+\frac{x^2}\nu\Big).
 \end{align*}
-Unlike in M2, the marginal parameters also enter the copula term through $x_{ti}$, so the first-order conditions have no closed-form solution and (\ref{eq:m3lik}) is maximised numerically. We proceed in two steps. First, the margins are estimated by their own Gaussian likelihood and $(\rho,\nu)$ by maximising the copula term alone; this is the inference-functions-for-margins estimator \citep[Sect.~5.5]{McNeil05}. Second, starting from this point, all six parameters are optimised jointly on (\ref{eq:m3lik}) with a quasi-Newton method (L-BFGS-B) under the constraints $|\rho|<1$ and $2<\nu\le 200$, with $\log\nu$ as the optimisation variable. The second step is what the question asks for, the maximum-likelihood estimator of the full model; the first only provides its starting value. Standard errors are obtained from the inverse of the observed information matrix, computed by finite differences. For $\nu\to\infty$ the $t$-copula converges to the Gaussian copula and M3 to M2, so that M2 is nested in M3 on the boundary of the parameter space.
+Unlike in M2, the marginal parameters also enter the copula term through $x_{ti}$, so the first-order conditions have no closed-form solution and (\ref{eq:m3lik}) is maximised numerically. We proceed in two steps. First, the margins are estimated by their own Gaussian likelihood and $(\rho,\nu)$ by maximising the copula term alone; this is the inference-functions-for-margins estimator \citep[Sect.~5.5]{McNeil05}. Second, starting from this point, all six parameters are optimised jointly on (\ref{eq:m3lik}) with a quasi-Newton method (L-BFGS-B) under the constraints $|\rho|<1$ and $2<\nu\le 200$, with $\log\nu$ as the optimisation variable. Only the second step delivers the maximum-likelihood estimator of the full model, which is efficient and recognises that the margins also shape the copula term; the first provides its starting value and a robustness check. Standard errors are obtained from the inverse of the observed information matrix, computed by finite differences. For $\nu\to\infty$ the $t$-copula converges to the Gaussian copula and M3 to M2, so that M2 is nested in M3 on the boundary of the parameter space.
 
 Two quantities implied by M3 are needed later. The coefficient of lower (and, by symmetry, upper) tail dependence of the $t$-copula is \citep[Example~5.33]{McNeil05}
 \begin{equation}
