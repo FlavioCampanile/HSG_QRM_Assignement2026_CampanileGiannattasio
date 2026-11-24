@@ -27,6 +27,7 @@ or step by step:
 | `05_basel_irb.py` | x | 03 | seconds |
 | `06_storm_catalogue.py` | xi, step 1 | **CLIMADA**, internet at the first run | 1-5 min |
 | `07_climate_overlay.py` | xi, step 2 | 06 | ~3 min |
+| `07b_climate_channels.py` | xi, extensions (PD/LGD channels of Pozdyshev et al. 2025, climate-adjusted IRB, gust stress) | 06, 07 | ~5 min |
 | `08_build_report.py` | - | all | seconds |
 
 Script 06 downloads the winter-storm hazard for Switzerland through the CLIMADA data API, evaluates

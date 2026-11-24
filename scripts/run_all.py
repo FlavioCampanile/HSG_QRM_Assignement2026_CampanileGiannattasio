@@ -33,4 +33,5 @@ if __name__ == "__main__":
     else:
         print("\n=== 06_storm_catalogue.py skipped (CLIMADA not available or --skip-climada)")
     run("07_climate_overlay.py")
+    run("07b_climate_channels.py")
     run("08_build_report.py")

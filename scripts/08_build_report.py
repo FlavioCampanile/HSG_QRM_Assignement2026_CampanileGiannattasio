@@ -47,6 +47,9 @@ FMT = {
     "ppm": lambda x: _grp(P.sig(1e6 * x)),                                 # relative change in parts per million
     "usd2": lambda x: _grp(f"{x:,.2f}"),                                   # USD with cents
     "sig": lambda x: _grp(P.sig(x)),
+    "excess_ppm": lambda x: _grp(P.sig(1e6 * (x - 1))),                    # a factor F shown as (F - 1) in ppm
+    "usd0": lambda x: _grp(f"{x:,.0f}"),
+    "sci": lambda x: (lambda m, e: f"\\ensuremath{{{m}\\times10^{{{e}}}}}")(*f"{x:.0e}".split("e")[0:1], int(f"{x:.0e}".split("e")[1])),
     "date": lambda s: f"{dt.date.fromisoformat(s).day} {dt.date.fromisoformat(s):%B %Y}",
     "str": lambda s: str(s).replace("_", "\\_").replace("%", "\\%").replace("&", "\\&"),
 }
