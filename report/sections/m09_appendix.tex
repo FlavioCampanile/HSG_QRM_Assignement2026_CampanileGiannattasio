@@ -1,0 +1,139 @@
+% =====================================================================
+% Technical appendix: the derivations required by the assignment (iii of the conditions)
+% =====================================================================
+\appendix
+\section*{Technical Appendix}
+
+\subsection*{A. THE CREDIT MODEL: QUESTIONS (i)--(iii)}
+\paragraph{Link to Merton's model.}
+In Merton's model \citep[Ch.~2]{DeGiorgi26} the firm defaults if $V_{k,T}\le B_k$, i.e.\ if $Y_k=\log(V_{k,T}/V_{k,0})\le d_k=\log(B_k/V_{k,0})$. Model (\ref{eq:Yk}) keeps this structure, adds factor dependence \citep[Sect.~8.3]{McNeil05} and calibrates $d_k$ to $\pi_k$.
+
+\paragraph{(i) Conditional default probability.}
+Fix $\Theta=\theta$. Since $\sqrt{1-\lambda_k}\,s_k>0$, $Y_k\le d_k\iff\epsilon_k\le(d_k-\sqrt{\lambda_k}a_k'\theta)/(\sqrt{1-\lambda_k}\,s_k)$. As $\epsilon_k\sim N(0,1)$ is independent of $\Theta$, conditioning does not change its law, hence
+\begin{equation}
+\label{eq:condpd}
+p_k(\theta):=\P[I_k=1\mid\Theta=\theta]=\Phi\!\left(\frac{d_k-\sqrt{\lambda_k}\,a_k'\theta}{\sqrt{1-\lambda_k}\,s_k}\right),
+\end{equation}
+that is, $I_k\mid\Theta\sim\mathrm{Bernoulli}(p_k(\Theta))$.
+Given $\Theta$, the $I_k$ are functions of the independent $\epsilon_k$ only, so they are conditionally independent (a Bernoulli mixture model, \citealp[Sect.~8.4]{McNeil05}). By iterated expectations $\pi_k=\P[Y_k\le d_k]=\E[p_k(\Theta)]$, and joint defaults have probability $\E[p_j(\Theta)p_k(\Theta)]$: default correlation arises only through $\Theta$. With $a_k\ge0$ for all names, a fall of both indices raises every $p_k$.
+
+\paragraph{(ii) Portfolio loss.}
+A default costs the exposure net of recovery, $E_k(1-R_k)$, so
+\begin{equation}
+\label{eq:loss}
+L=\sum_{k=1}^{100}E_k(1-R_k)I_k,
+\end{equation}
+with $\E[L]=\sum_kE_k(1-R_k)\pi_k$ and $\E[L\mid\Theta]=\sum_kE_k(1-R_k)p_k(\Theta)$.
+$\E[L]$ is the same under every model of $\Theta$ satisfying $\E[p_k(\Theta)]=\pi_k$; $\E[L\mid\Theta]$ is the loss of an infinitely granular (``large pool'') portfolio with the same systematic risk.
+
+\paragraph{(iii) Standard deviation of $Y_k$.}
+By independence of $\epsilon_k$ and $\Theta$, $\Var(Y_k)=\lambda_ka_k'\Sigma a_k+(1-\lambda_k)s_k^2$. Setting $\Var(Y_k)=s_k^2$ gives $\lambda_ks_k^2=\lambda_ka_k'\Sigma a_k$ and, as $\lambda_k>0$,
+\begin{equation}
+\label{eq:sk}
+s_k=\sqrt{a_k'\Sigma a_k}=\sqrt{a_{k1}^2\sigma_1^2+2a_{k1}a_{k2}\rho\sigma_1\sigma_2+a_{k2}^2\sigma_2^2}.
+\end{equation}
+
+\paragraph{Two consequences.}
+First, $\Corr(Y_j,Y_k)=\sqrt{\lambda_j\lambda_k}\,\Corr(a_j'\Theta,a_k'\Theta)$, so $\lambda_k$ plays the role of the IRB correlation $\rho_k$ (Section~\ref{sec:irb}). Second, with $V_k=a_k'(\Theta-\mu)/s_k$ (mean zero, unit variance),
+\begin{equation}
+\label{eq:standardised}
+Y_k\le d_k\iff\sqrt{\lambda_k}\,V_k+\sqrt{1-\lambda_k}\,\epsilon_k\le d_k^*:=\frac{d_k-\sqrt{\lambda_k}\,a_k'\mu}{s_k}.
+\end{equation}
+Once $d_k$ is calibrated to $\pi_k$, the loss depends on $\Theta$ only through the \emph{shape} of the law of $(V_1,\dots,V_{100})$, not through the level of means and volatilities. This is why we can impose the one-year $\pi_k$ at the one-week horizon: the horizon enters only through the non-normality of weekly returns, and the comparison with the one-year IRB formula stays like for like.
+
+\subsection*{B. ESTIMATION: QUESTION (iv)}
+\paragraph{M1.} Each observed pair $\theta_t$, $t=1,\dots,n$, has probability $1/n$; pairs are kept together, preserving the empirical dependence.
+
+\paragraph{M2.} For an i.i.d.\ Gaussian sample the log-likelihood is
+\[
+\ell(\mu,\Sigma)=-n\log(2\pi)-\tfrac n2\log|\Sigma|-\tfrac12\textstyle\sum_t(\theta_t-\mu)'\Sigma^{-1}(\theta_t-\mu).
+\]
+The condition $\partial\ell/\partial\mu=\Sigma^{-1}\sum_t(\theta_t-\mu)=0$ gives $\hat\mu=\bar\theta$. Substituting it, the profile log-likelihood is $-\frac n2\{\log|\Sigma|+\mathrm{tr}(\Sigma^{-1}S)\}$ with $S=n^{-1}\sum_t(\theta_t-\bar\theta)(\theta_t-\bar\theta)'$. Differentiating with respect to $\Sigma^{-1}$, using $\partial\log|\Sigma^{-1}|/\partial\Sigma^{-1}=\Sigma$ and $\partial\,\mathrm{tr}(\Sigma^{-1}S)/\partial\Sigma^{-1}=S$, gives $\hat\Sigma=S$, i.e.
+\[
+\hat\sigma_i^2=\frac1n\sum_t(\theta_{ti}-\bar\theta_i)^2,\qquad \hat\rho=\frac{\frac1n\sum_t(\theta_{t1}-\bar\theta_1)(\theta_{t2}-\bar\theta_2)}{\hat\sigma_1\hat\sigma_2}.
+\]
+Standard errors are $\hat\sigma_i/\sqrt n$ for $\hat\mu_i$, $\hat\sigma_i/\sqrt{2n}$ for $\hat\sigma_i$ and $(1-\hat\rho^2)/\sqrt n$ for $\hat\rho$.
+
+\paragraph{M3.} Let $z_i=(\theta_i-\mu_i)/\sigma_i$ and $u_i=\Phi(z_i)$. By Sklar's theorem \citep[Sect.~5.1]{McNeil05} the density of $\Theta$ is the copula density times the marginal densities, $f_\Theta=c_{\nu,\rho}(u_1,u_2)\prod_i\sigma_i^{-1}\varphi(z_i)$. The $t$-copula is $C_{\nu,\rho}(u_1,u_2)=F_{t,2}(t_\nu^{-1}(u_1),t_\nu^{-1}(u_2);\nu,\rho)$; differentiating in $u_1,u_2$ with $\partial t_\nu^{-1}(u)/\partial u=1/f_{t,1}(t_\nu^{-1}(u);\nu)$ gives
+\[
+c_{\nu,\rho}(u_1,u_2)=\frac{f_{t,2}(x_1,x_2;\nu,\rho)}{f_{t,1}(x_1;\nu)f_{t,1}(x_2;\nu)},\qquad x_i=t_\nu^{-1}(\Phi(z_i)),
+\]
+with $f_{t,1}$, $f_{t,2}$ the densities of Section~6.2 of the assignment. The log-likelihood of $\psi=(\mu_1,\mu_2,\sigma_1,\sigma_2,\rho,\nu)$ is
+\begin{multline*}
+\ell(\psi)=\sum_{t=1}^n\Big\{\sum_{i=1}^2\big[-\log\sigma_i-\tfrac12\log(2\pi)-\tfrac12z_{ti}^2\big]\\
++\log f_{t,2}(x_{t1},x_{t2};\nu,\rho)-\sum_{i=1}^2\log f_{t,1}(x_{ti};\nu)\Big\}.
+\end{multline*}
+The margins enter the copula term through $x_{ti}$, so there is no closed form. We first estimate the margins by their Gaussian likelihood and $(\rho,\nu)$ from the copula term (inference functions for margins, \citealp[Sect.~5.5]{McNeil05}), then maximise $\ell$ jointly in all six parameters (L-BFGS-B, $|\rho|<1$, $2<\nu\le200$, optimising $\log\nu$). Standard errors come from the inverse observed information. M2 is the limit $\nu\to\infty$, on the boundary of the parameter space, so the likelihood-ratio statistic follows a $\frac12\chi^2_0+\frac12\chi^2_1$ mixture \citep{SelfLiang87}. The coefficient of tail dependence is $\lambda_L=2\,t_{\nu+1}\big(-\sqrt{(\nu+1)(1-\rho)/(1+\rho)}\big)$ \citep[Example~5.33]{McNeil05}, against $0$ for the Gaussian copula; it equals \val{q4.M3.tail_dep|f3} at the estimates. The Pearson correlation of $\Theta$ under M3, needed in (\ref{eq:sk}), is computed by numerical integration.
+
+\subsection*{C. SIMULATION AND THRESHOLDS: QUESTIONS (v)--(vii)}
+\paragraph{Factor draws.} M1: draw $t$ uniformly on $\{1,\dots,n\}$ and set $\Theta=\theta_t$. M2: $\Theta=\hat\mu+A'Z$, $Z\sim N(0,I_2)$, with $A$ the upper-triangular Cholesky factor, $A'A=\hat\Sigma$. M3: $Z\sim N(0,P)$ with correlation $\hat\rho$ and $W\sim\chi^2_{\hat\nu}$ independent; $X=\sqrt{\hat\nu/W}\,Z$ is bivariate $t$, $U_i=t_{\hat\nu}(X_i)$ has the $t$-copula, and $\Theta_i=\hat\mu_i+\hat\sigma_i\Phi^{-1}(U_i)$ has the required Gaussian margin by the quantile transformation. Each scenario adds $100$ independent $\epsilon_k$ and applies (\ref{eq:Yk}) and (\ref{eq:loss}).
+
+\paragraph{Common random numbers.} Every scenario uses the same primitive draws for all models: the Gaussian pair $Z$ enters M2 and M3, the mixing variable of M3 is $W=F^{-1}_{\chi^2_{\hat\nu}}(U_W)$ for a uniform $U_W$, M1 uses the week $\lceil nU_B\rceil$ for a uniform $U_B$, and the shocks $\epsilon_k$ are shared. All generators are seeded.
+
+\paragraph{Empirical-quantile threshold.} With $N$ draws of $Y_k$, the threshold is the generalised inverse of the empirical distribution at $\pi_k$:
+\[
+\hat d_k=\inf\Big\{y:\tfrac1N\textstyle\sum_j\ind_{\{Y_k^{(j)}\le y\}}\ge\pi_k\Big\}=Y_{k,(\lceil N\pi_k\rceil)} .
+\]
+$N\pi_k$ is an integer for all ratings, so each firm defaults in exactly a share $\pi_k$ of the scenarios. For \val{q5.n_names_k_le_7|int} names this rests on seven or fewer draws.
+
+\paragraph{Reference threshold.} We solve $\E[p_k(\Theta;d_k)]=\pi_k$ on the model, integrating $\epsilon_k$ analytically through (\ref{eq:condpd}). M2: $d_k=\sqrt{\lambda_k}a_k'\mu+s_k\Phi^{-1}(\pi_k)$. M1: $d_k$ is the root of $n^{-1}\sum_t p_k(\theta_t;d_k)=\pi_k$. M3: the expectation is a two-dimensional integral against the density of $(G_1,G_2)$, $c_{\nu,\rho}(\Phi(g_1),\Phi(g_2))\varphi(g_1)\varphi(g_2)$, computed with the trapezoidal rule (step $0.1$ on $[-8.5,8.5]^2$; a five times finer grid changes the implied probabilities by less than $10^{-5}$). Roots are found by safeguarded Newton iteration.
+
+\paragraph{Reference run and rolling windows.} The reference run has $2{,}000{,}000$ scenarios per model in $200$ blocks of $10{,}000$ with the reference thresholds; the blocks are independent replications of the baseline. In the rolling analysis each window uses overlapping five-day returns (a pseudo-likelihood), quadrature step $0.2$ and $50{,}000$ scenarios with the same random numbers at every date. The placebo band comes from M3 with the parameters of M2 and $\nu=200$, run as one window for $200$ seeds.
+
+\subsection*{D. VALUE-AT-RISK AND EXPECTED SHORTFALL}
+With $X=-L$ \citep[Ch.~1]{DeGiorgi26},
+\begin{align*}
+\VaR_\alpha(X)&=-\inf\{x:\P[X\le x]\ge1-\alpha\},\\
+\ES_\alpha(X)&=\tfrac{1}{1-\alpha}\Big\{\E\big[-X\ind_{\{X\le-\VaR_\alpha\}}\big]-\VaR_\alpha\big(\P[X\le-\VaR_\alpha]-(1-\alpha)\big)\Big\}.
+\end{align*}
+The second ES term matters because $L$ is discrete. For ordered simulated losses $\ell_{(1)}\ge\dots\ge\ell_{(N)}$, $\widehat\VaR_\alpha=\ell_{(k^*)}$ with $k^*=\lceil N(1-\alpha)\rceil$ (the tenth-largest loss for $N=10{,}000$), and
+\[
+\widehat\ES_\alpha=\frac{1}{N(1-\alpha)}\Big\{\sum_{j:\ell_j\ge\widehat\VaR_\alpha}\ell_j-\widehat\VaR_\alpha\big(\#\{j:\ell_j\ge\widehat\VaR_\alpha\}-N(1-\alpha)\big)\Big\},
+\]
+the average of the ten largest losses, corrected for ties.
+
+\subsection*{E. CLIMATE OVERLAY: QUESTION (xi)}
+\paragraph{Loss with storms.} With $m_k$ the worst damage ratio of the year at $k$ and $\phi_k=\phi$,
+\[
+L^{\mathrm{clim}}=\sum_kE_k\big(1-R_k(1-\phi m_k)\big)I_k=L+\phi A,
+\]
+with $A=\sum_kE_kR_km_kI_k\ge0$, so EL, VaR and ES can only increase.
+
+\paragraph{Exact law of the worst event.} Order the events damaging $k$ by decreasing ratio, $m_{k,(1)}\ge m_{k,(2)}\ge\dots$, with frequencies $f_{(j)}$. The worst event of the year is the $j$-th if none of the worse ones occurs and the $j$-th does:
+\[
+\P[m_k=m_{k,(j)}]=e^{-(f_{(1)}+\dots+f_{(j-1)})}\big(1-e^{-f_{(j)}}\big),\quad \P[m_k=0]=e^{-\sum_jf_{(j)}} .
+\]
+By independence, $\E[L^{\mathrm{clim}}]-\E[L]=\phi\sum_kE_kR_k\pi_k\E[m_k]$ exactly.
+
+\paragraph{First-order tail effect.} For a small perturbation \citep{Gourieroux00}, $\Delta\VaR_\alpha\approx\phi\,\E[A\mid L=\VaR_\alpha]$ and $\Delta\ES_\alpha\approx\phi\,\E[A\mid L\ge\VaR_\alpha]$, with $\E[A\mid L]=\sum_kE_kR_k\E[m_k]\P[I_k=1\mid L]$ under independence. Only the expected damage at the locations of the defaulting names matters to first order, which is why concentration is irrelevant under independence. For the reference run we use the equivalent sampler $M\sim\mathrm{Poisson}(\sum_ef_e)$ events with identities drawn with probabilities $f_e/\sum f$ (Poisson superposition).
+
+\paragraph{Link to \citet{Pozdyshev25}.} In their model an event scales assets by $e^{-\alpha}$, giving $\mathrm{LGD}_1=\mathrm{LGD}_0+(1-e^{-\alpha})(1-\mathrm{LGD}_0)$; with $1-R_k(e)=\mathrm{LGD}_{0,k}+\phi\MDR_k(e)(1-\mathrm{LGD}_{0,k})$ our overlay is this LGD channel with $1-e^{-\alpha}=\phi\MDR$, and their add-on reproduces our expected-loss effect to machine precision. For the PD channel the worst damage shifts the default threshold by $\alpha/\sigma_A$ standard deviations, $I_k=\ind\{Y_k\le d_k+s_k\alpha/\sigma_A\}$ with $\alpha=-\log(1-\phi m_k)$ and $\sigma_A=25\%$; the default probability becomes the $q$-deformed mixture $\sum_jp_j\Phi(\Phi^{-1}(\pi_k)+\alpha_j/\sigma_A)$. The defaults added in the tail are replaced by their expectation given $\Theta$ to obtain a first-order $\Delta\ES$. The gust stress multiplies every gust speed by $1.05$, $1.10$ or $1.20$ and re-evaluates the impact function.
+
+\subsection*{F. CODE AND CORRESPONDENCE WITH THE ASSIGNMENT}
+\sloppy The Python code is attached. The package \texttt{src/qrm} has one module per component (\texttt{data}, \texttt{factor\_models}, \texttt{credit\_model}, \texttt{risk\_measures}, \texttt{rolling}, \texttt{basel\_irb}, \texttt{climada\_io}, \texttt{climate}, \texttt{climate\_channels}); the numbered scripts reproduce every table, figure and number of this report, and \texttt{run\_all.py} runs them in sequence. Only script \texttt{06} needs CLIMADA; it stores the storm catalogue, so the rest runs without it. All random draws are seeded, and a fresh run reproduces the reported numbers exactly. Table~\ref{tab:map} maps each question to this report.
+
+\begin{table}[!htb]
+\caption{Where each question of the assignment is answered.}
+\label{tab:map}
+\centering
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lp{0.5\textwidth}l@{}}
+\toprule
+Item & Content & Where \\
+\midrule
+(i) & Conditional default probability; law of $I_k$ given $\Theta$ & App.~A, eq.~(\ref{eq:condpd}) \\
+(ii) & Portfolio loss & App.~A, eq.~(\ref{eq:loss}) \\
+(iii) & Standard deviation of $Y_k$ & App.~A, eq.~(\ref{eq:sk}) \\
+(iv) & ML estimation of M2 and M3 & Sect.~\ref{sec:setting}, Table~\ref{tab:mle}; App.~B \\
+(v)--(vi) & Simulation of $Y_k$; thresholds $d_k$ & Sect.~\ref{sec:method}; App.~C \\
+(vii) & Portfolio loss distribution & Sect.~\ref{sec:method}, Fig.~\ref{fig:hist} \\
+(viii) & $99.9\%$ VaR and ES; comparison & Sect.~\ref{sec:results}, Tables~\ref{tab:var}--\ref{tab:varref}; App.~D \\
+(ix) & VaR and ES on rolling 500-day windows & Sect.~\ref{sec:rolling}, Fig.~\ref{fig:rolling} \\
+(x) & $\rho_k$, $K_k$, meaning of $\mathrm{MA}(\pi_k,1)$, $K$, RWA & Sect.~\ref{sec:irb}, Table~\ref{tab:irb} \\
+(x) & IRB capital vs.\ UL; regulator's view & Sect.~\ref{sec:irb}, Table~\ref{tab:gap} \\
+(xi) & Interpretation of $\phi_k=0$ and $\phi_k=1$ & Sect.~\ref{sec:climate} \\
+(xi) & Storm overlay: VaR and ES vs.\ (viii) & Sect.~\ref{sec:climate}, Table~\ref{tab:clim}; App.~E \\
+(xi) & Geographically diversified portfolio; canton level & Sect.~\ref{sec:climate}, Table~\ref{tab:climvar} \\
+\bottomrule
+\end{tabular}}
+\end{table}

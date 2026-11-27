@@ -1,0 +1,49 @@
+% =====================================================================
+% 1. Executive summary
+% Management version: every number comes from generated/numbers.tex through \val{...};
+% results and conclusions are those of the full technical analysis (branch extra-features-version).
+% =====================================================================
+\section{Executive Summary}
+\label{sec:summary}
+
+\paragraph{The question.}
+A single default rarely threatens a lender; many defaults at the same time do. In our portfolio of $100$ corporate bonds (USD~\val{q5.total_exposure|usd} of exposure) defaults cluster because the issuers' asset values move with two equity markets, the Swiss Performance Index (SPI) and the S\&P~500 (SPX). The regulatory loss measure, the $99.9\%$ value-at-risk (VaR) over the horizon of one week, is therefore driven by \emph{how the two markets are assumed to move together}. We hold every issuer's default probability fixed, so the expected loss is USD~\val{q5.EL|usd} in all cases, and compare three views of the market:
+\begin{itemize}
+\item \textbf{M1, history:} the observed weekly returns since 2000, replayed as they occurred;
+\item \textbf{M2, Gaussian:} the textbook bell-curve model, in which joint crashes are very rare;
+\item \textbf{M3, $t$-copula:} bell-curve markets that are allowed to crash \emph{together} more often.
+\end{itemize}
+
+\begin{table}[tb]
+\caption{Key figures (USD; two million simulated scenarios per model). Unexpected loss $=$ VaR $-$ expected loss.}
+\label{tab:key}
+\centering
+{\small\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ & M2 Gaussian & M3 $t$-copula & M1 history \\
+\midrule
+VaR $99.9\%$ & \val{q8.M2.VaR_ref|usd} & \val{q8.M3.VaR_ref|usd} & \val{q8.M1.VaR_ref|usd} \\
+\quad in \% of exposure & \val{q8.M2.VaR_pct_exposure|pct1} & \val{q8.M3.VaR_pct_exposure|pct1} & \val{q8.M1.VaR_pct_exposure|pct1} \\
+Expected shortfall $99.9\%$ & \val{q8.M2.ES_ref|usd} & \val{q8.M3.ES_ref|usd} & \val{q8.M1.ES_ref|usd} \\
+Unexpected loss & \val{q8.M2.UL_ref|usd} & \val{q8.M3.UL_ref|usd} & \val{q8.M1.UL_ref|usd} \\
+\quad multiple of Basel IRB capital & \val{q10.ratio_UL_M2|f2} & \val{q10.ratio_UL_M3|f2} & \val{q10.ratio_UL_M1|f2} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\paragraph{Main findings.}
+\begin{enumerate}
+\item \textbf{Fat tails matter, joint crashes much less.} Allowing the two markets to crash together (M3) raises VaR by only \val{q8.M3.VaR_vs_M2|pct1}\% over the Gaussian model, although the data clearly prefer M3. Replaying history (M1) raises it by \val{q8.M1.VaR_vs_M2|pct0}\%, because each market on its own has a much fatter left tail than a bell curve (Table~\ref{tab:key}, Section~\ref{sec:results}).
+\item \textbf{The historical figure rests on two weeks.} The M1 result is essentially the loss in the second-worst week since 2000; it would change if the sample were different.
+\item \textbf{$10{,}000$ simulations are not enough to rank similar models.} At that size the VaR has a standard error of \val{derived.se_rel_min|pct0}--\val{derived.se_rel_max|pct0}\%, larger than the gap between M2 and M3. Our conclusions rest on two million scenarios.
+\item \textbf{Through time, history is volatile and the Gaussian model is not.} On rolling two-year windows the Gaussian VaR hardly moves, while the historical VaR jumps by up to \val{q9.ratio_M1_M2_max|excess_pct0}\% above it whenever a crash week enters the window (Section~\ref{sec:rolling}).
+\item \textbf{Regulatory capital is about a third of the model-based figure.} The Basel IRB capital is USD~\val{q10.K|usd} (risk-weighted assets USD~\val{q10.RWA|usd}), \val{q10.ratio_UL_M2|inv_pct0}\% of the Gaussian unexpected loss. The gap is due to the portfolio's high exposure to the market, not to the small number of names (Section~\ref{sec:irb}).
+\item \textbf{Winter storms are immaterial for this portfolio.} Storm damage to the collateral, assessed with the CLIMADA platform, raises the expected loss by \val{q11.dEL_exact|ppm} parts per million and expected shortfall (ES) by about USD~\val{q11.first_order.M2.addon_tail_usd|usd2}. Even under a severe storm stress, or if the worst storm years coincided with the worst credit years, ES would move by less than $0.02\%$ (Section~\ref{sec:climate}).
+\end{enumerate}
+
+\paragraph{Implications for risk management.}
+The choice of the \emph{marginal} distribution of market returns is the decision that drives tail risk; the dependence model is secondary. A tail estimate should always be reported with its simulation error, and differences between models smaller than that error should not be acted upon. For a portfolio with strong market exposure, the standard IRB capital is not conservative, and the gap belongs to the supervisory review of Pillar~2. Under the present climate, Swiss winter storms do not change the capital picture of this portfolio.
+
+\paragraph{How to read this report.}
+Sections~\ref{sec:setting}--\ref{sec:conclusion} give the results in non-technical terms, each opening with its key message. The derivations required by the assignment are collected in the Technical Appendix, and Table~\ref{tab:map} at its end maps every question of the assignment to the place where it is answered. All figures are produced by the attached code, which reproduces every number in this report.

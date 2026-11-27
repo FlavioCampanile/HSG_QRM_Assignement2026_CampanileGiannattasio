@@ -1,0 +1,36 @@
+% =====================================================================
+% 5. Dynamics -- question (ix)
+% =====================================================================
+\section{Risk Through Time}
+\label{sec:rolling}
+
+\keymsg{Re-estimated every week on the last two years of data, the Gaussian VaR is almost constant, the $t$-copula VaR is indistinguishable from it, and the historical VaR swings between USD~\val{q9.min.VaR_M1|mn2} and \val{q9.max.VaR_M1|mn2} million depending on whether a crash week is in the window.}
+
+\paragraph{Design (question ix).}
+At each date we re-estimate the three models on the last $500$ daily returns (about two years), recompute $s_k$ and the thresholds so that every firm keeps its default probability $\pi_k$, and simulate $50{,}000$ scenarios. Two years contain only $100$ non-overlapping weeks, too few for a $t$-copula or an empirical $99.9\%$ quantile, so within each window we use the $496$ overlapping five-day returns. The window moves forward by one week, giving \val{q9.n_windows|int} dates from \val{q9.first|date} to \val{q9.last|date}. To judge whether an M3 $-$ M2 difference is real, we compare it with a \emph{placebo band}: the spread of the same difference when the two models are identical, which measures pure simulation noise (standard deviation \val{q9.placebo.VaR_sd|pct1}\% for VaR).
+
+\begin{figure}[p]
+\centering
+\qrmfigure{fig_rolling}
+\caption{Rolling estimates on windows of 500 daily returns. Top two panels: $99.9\%$ VaR and ES with thresholds recalibrated to $\pi_k$ in every window. Third panel: VaR with thresholds frozen at their full-sample values. Lower panels: dependence parameters and degrees of freedom of the $t$-copula.}
+\label{fig:rolling}
+\end{figure}
+
+\begin{table}[tb]
+\caption{Rolling $99.9\%$ VaR and ES (USD), \val{q9.n_windows|int} windows of 500 daily returns.}
+\label{tab:rolling}
+\centering
+\qrmtable{tab_rolling}
+\end{table}
+
+\paragraph{Gaussian model: almost constant.}
+The M2 VaR stays between USD~\val{q9.min.VaR_M2|usd} and USD~\val{q9.max.VaR_M2|usd} (Figure~\ref{fig:rolling}, Table~\ref{tab:rolling}), although market volatility varies by a factor of \val{q9.sigma_ratio_max_min|f1} across windows. Because the thresholds are reset to the same default probabilities, higher volatility is absorbed by lower thresholds; what remains is the correlation between the markets (correlation between rolling VaR and rolling $\hat\rho$: \val{q9.corr_VaRM2_rho|f2}).
+
+\paragraph{$t$-copula: within the noise for VaR, slightly above it for ES.}
+The M3 $-$ M2 difference in VaR averages \val{q9.dVaR_mean|spct1}\% and lies inside the placebo band in \val{q9.share_dVaR_in_band|pct0}\% of the windows. Two-year windows are too short to pin down the degrees of freedom ($\hat\nu$ is at its upper bound in \val{q9.share_nu_at_bound|pct0}\% of them). For ES the difference averages \val{q9.dES_mean|spct1}\% and exceeds the band in \val{q9.share_dES_above_band|pct0}\% of the windows, mostly in crisis windows with strong tail dependence: joint crashes show up in ES before VaR, but by less than 10\%.
+
+\paragraph{Historical model: driven by crash weeks.}
+The M1 VaR ranges from USD~\val{q9.min.VaR_M1|usd} to USD~\val{q9.max.VaR_M1|usd} (window ending \val{q9.argmax_VaR_M1|date}), with a standard deviation \val{q9.ratio_std_M1_M2|f0} times that of M2. With $496$ observations, the $99.9\%$ tail of the market is the single worst week in the window: the VaR jumps when a crash enters (2008, 2011, March 2020) and drops 500 days later when it leaves, the ``ghost effect'' of historical simulation. In calm windows M1 is even below M2 (\val{q9.share_M1_below_M2|pct0}\% of the windows).
+
+\paragraph{What recalibration hides.}
+Resetting the thresholds makes the model ``through-the-cycle'', which fits rating-based default probabilities like ours. If instead the thresholds are frozen at their full-sample values (third panel), higher volatility raises default probabilities: the Gaussian VaR then ranges from USD~\val{q9.min.VaRfix_M2|usd} to USD~\val{q9.max.VaRfix_M2|usd}, and the common volatility cycle dominates the differences between models.

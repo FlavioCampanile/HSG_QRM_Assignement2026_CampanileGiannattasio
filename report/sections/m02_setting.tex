@@ -1,0 +1,51 @@
+% =====================================================================
+% 2. Portfolio, model and data -- questions (i)-(iv); derivations in Appendix A-B
+% =====================================================================
+\section{Portfolio, Model and Data}
+\label{sec:setting}
+
+\keymsg{Defaults cluster only through the two equity markets. Both markets have a much fatter left tail than a bell curve, and they crash together more often than a Gaussian model allows; the three models of the market are built to separate these two effects.}
+
+\subsection{THE PORTFOLIO}
+The portfolio consists of $100$ corporate bonds of firms with branches in Switzerland and the United States. Total exposure is USD~\val{q5.total_exposure|usd}, of which \val{q5.share_exposure_inv_grade|pct0}\% is rated BBB or better. One-year default probabilities $\pi_k$ range from $0.01\%$ (AAA) to $20\%$ (CCC) and recovery rates $R_k$ from \val{q5.R_min|f2} to \val{q5.R_max|f2}. The expected loss is USD~\val{q5.EL|usd}; \val{q5.EL_share_B_CCC|pct0}\% of it comes from the B and CCC names. The issuers are located in \val{q5.n_cantons|int} Swiss cantons, which matters only for the storm analysis of Section~\ref{sec:climate}.
+
+\subsection{HOW DEFAULTS ARISE}
+We use the threshold model of the assignment, a version of Merton's model \citep[Ch.~2]{DeGiorgi26}: firm $k$ defaults when the return on its assets over the week, $Y_k$, falls below a threshold $d_k$, i.e.\ $I_k=\ind_{\{Y_k\le d_k\}}$. The asset return combines the two market returns $\Theta=(\Theta_1,\Theta_2)'$ (SPI and SPX) with a firm-specific shock:
+\begin{equation}
+\label{eq:Yk}
+Y_k=\sqrt{\lambda_k}\,a_k'\Theta+\sqrt{1-\lambda_k}\,s_k\,\epsilon_k ,
+\end{equation}
+where the shocks $\epsilon_k\sim N(0,1)$ are i.i.d.\ and independent of $\Theta$. The loadings $a_k$ say how much each firm depends on the Swiss and the US market, and $\lambda_k$ is the share of its risk that comes from the market (on average \val{q5.lam_mean|f2}). Three results, derived in Appendix~A, organise the analysis:
+\begin{itemize}
+\item \emph{Given the market, defaults are independent coin flips} (question i). Firm $k$ defaults with probability
+\[
+p_k(\theta)=\Phi\!\left(\frac{d_k-\sqrt{\lambda_k}\,a_k'\theta}{\sqrt{1-\lambda_k}\,s_k}\right),\qquad I_k\mid\Theta\sim\mathrm{Bernoulli}\big(p_k(\Theta)\big).
+\]
+A market fall raises every $p_k$ at once: this is the only channel through which defaults cluster.
+\item \emph{The loss} (question ii) is $L=\sum_kE_k(1-R_k)I_k$, the exposure net of recovery of the names that default; its mean, the expected loss, depends only on the $\pi_k$.
+\item \emph{The scale of $Y_k$} (question iii) is $s_k=\sqrt{a_k'\Sigma a_k}$, with $\Sigma$ the covariance matrix of $\Theta$.
+\end{itemize}
+Each threshold $d_k$ is set so that the firm defaults with its given probability, $\P[Y_k\le d_k]=\pi_k$. As a result, the three market models below produce the same expected loss, and any difference in VaR or ES comes from the \emph{shape} of the market distribution alone (Appendix~A).
+
+\subsection{MARKET DATA}
+We use weekly (Wednesday to Wednesday, non-overlapping) log-returns of the two indices from \val{q4.first_week|date} to \val{q4.last_week|date}, $n=\val{q4.n_weeks|int}$ weeks, on days when both markets traded. Both series include dividends: the SPX file is the total-return index. The data show two departures from a bell curve:
+\begin{itemize}
+\item \emph{Fat left tails.} Both markets are left-skewed and strongly leptokurtic: the Jarque--Bera test rejects normality far beyond any conventional level. The SPX fell by \val{derived.cel1_spx|pct1}\% in the week ending \val{derived.cel1_week|date}, a seven-standard-deviation event for a Gaussian model with the estimated volatility.
+\item \emph{Joint crashes.} When the SPI is in its worst $1\%$ of weeks, the SPX is in its own worst $1\%$ in \val{q4.joint_exceed_emp.0.01|pct0}\% of cases, against \val{q4.joint_exceed_gauss.0.01|pct0}\% under a Gaussian model with the same correlation (\val{q4.corr_all|f2}).
+\end{itemize}
+
+\subsection{THREE VIEWS OF THE MARKET}
+The three models are combinations of \emph{margins} (how risky each market is on its own) and a \emph{copula} (how the two move together), which makes them comparable:
+\begin{description}
+\item[M1] the empirical distribution: each historical week is a scenario with probability $1/n$; nothing is estimated.
+\item[M2] a bivariate Gaussian distribution: Gaussian margins, Gaussian copula.
+\item[M3] Gaussian margins with a $t$-copula, which allows joint crashes.
+\end{description}
+M3 and M2 differ only in the copula, so their gap measures the effect of joint crashes; M1 and M2 differ in both, so their gap measures the full cost of the Gaussian assumption. M2 and M3 are estimated by maximum likelihood (question iv; derivations in Appendix~B). Table~\ref{tab:mle} reports the estimates. The $t$-copula has $\hat\nu=\val{q4.M3.params.5|f1}$ degrees of freedom and a likelihood-ratio statistic of \val{q4.LR|f1} against the Gaussian copula ($p$-value below $10^{-9}$): \emph{joint crashes are statistically real}. But M3 keeps bell-curve margins, which is where the data depart most from the Gaussian model.
+
+\begin{table}[tb]
+\caption{Maximum-likelihood estimates of M2 and M3, weekly log-returns (standard errors in parentheses).}
+\label{tab:mle}
+\centering
+\qrmtable{tab_mle}
+\end{table}

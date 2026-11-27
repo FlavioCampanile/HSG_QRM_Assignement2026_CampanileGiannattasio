@@ -1,0 +1,63 @@
+% =====================================================================
+% 7. Physical climate risk -- question (xi); formulas in Appendix E
+% =====================================================================
+\section{Physical Climate Risk: Winter Storms}
+\label{sec:climate}
+
+\keymsg{Swiss winter storms barely damage the collateral: the expected loss rises by \val{q11.dEL_exact|ppm} parts per million and ES by about USD~\val{q11.first_order.M2.addon_tail_usd|usd2}. A more diversified portfolio would not change this; only a strong link between storm years and credit years, or a far more destructive hazard, would make it visible, and even then by less than $0.02\%$ of ES.}
+
+\paragraph{What kind of risk, and what kind of statement.}
+Climate risks are either \emph{transition} risks (regulation, technology, preferences in the move to a low-carbon economy) or \emph{physical} risks, acute or chronic \citep{Acharya23}. Winter storms are an acute physical risk; here they reach credit risk through the collateral, i.e.\ through the loss given default. Unlike supervisory stress tests, which report losses conditional on scenarios such as the NGFS pathways \citep{NGFS24}, our storm catalogue describes the \emph{present} climate probabilistically, so the overlay yields unconditional VaR and ES.
+
+\paragraph{Hazard, exposure, vulnerability.}
+Following the CLIMADA framework \citep{AznarSiguan19,HauserEtAl26}, the \emph{hazard} is CLIMADA's probabilistic set of European winter storms for Switzerland: \val{q11.hazard.n_events|int} events (historical storms and perturbed versions), each with an annual frequency $f_e$ and a gust-speed footprint. The \emph{exposure} is the recovery value $E_kR_k$ of each counterparty, placed at its coordinates (USD~\val{q5.recovery_value|usd} in total). The \emph{vulnerability} is the impact function of \citet{Welker21} for Swiss buildings, which turns gust speed into a mean damage ratio $\MDR_k(e)$. We evaluate the hazard at each counterparty's coordinates, the most precise information available; evaluating it at the centroid of the canton, as worded in the assignment, gives the same conclusions (Table~\ref{tab:climvar}).
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_climate_hazard}
+\caption{Left: gust footprint of the most damaging storm of the catalogue (Lothar, 26 December 1999) and location of the counterparties (circle area proportional to exposure). Right: impact function (mean damage ratio, logarithmic scale) and frequency-weighted distribution of the gust speeds at the counterparties.}
+\label{fig:climhaz}
+\end{figure}
+
+\paragraph{The collateral-sensitivity parameter $\phi_k$.}
+The climate-adjusted recovery rate is $R_k(e)=R_k(1-\phi_k\MDR_k(e))$.
+\begin{itemize}
+\item $\phi_k=0$: none of the recovery value is physically at the exposed site (financial collateral, guarantees, assets elsewhere). Storms cannot reduce recovery, and the counterparty is immune to the overlay.
+\item $\phi_k=1$: the whole recovery value consists of physical assets at the site. Every unit of damage reduces recovery proportionally; a storm that destroys the site leaves nothing to recover.
+\end{itemize}
+We use $\phi_k=0.5$ as required. Two real-world features argue that the effective value is lower. In Switzerland, insurance of buildings against natural hazards, storms included, is mandatory, and in 19 cantons it is provided by the cantonal building insurer \citep{BAFU20}: insured damage does not reduce the bank's recovery. And the impact function, calibrated on the claims of the Zurich cantonal building insurer, already reflects today's building standards.
+
+\paragraph{Design.}
+On top of the $10{,}000$ credit scenarios of Section~\ref{sec:results}, and independently of them as the assignment prescribes, we draw $N_e\sim\mathrm{Poisson}(f_e)$ for every event; if several events hit a counterparty in the same year we keep the worst one, $m_k$. Defaults are unchanged; each defaulted name loses in addition the fraction $\phi\,m_k$ of what it would have recovered, so the loss becomes $L+\phi A$ with $A=\sum_kE_kR_km_kI_k$. We repeat the exercise on the two-million-scenario reference run.
+
+\begin{table}[tb]
+\caption{Question (xi): $99.9\%$ VaR and ES without the storm overlay (USD) and their increase with it, in USD and in parts per million (ppm; $1$~ppm $=0.0001\%$), $\phi_k=0.5$.}
+\label{tab:clim}
+\centering
+\qrmtable{tab_climate}
+\end{table}
+
+\paragraph{Results against question (viii).}
+Table~\ref{tab:clim} compares VaR and ES with and without storms. The increases are a few US dollars at most: no relative change exceeds \val{q11.assign.M2.dES|ppm}~ppm in the $10{,}000$-scenario run. The reason lies in the hazard. Gusts at the counterparties rarely exceed the $20$~m/s at which damage starts (Figure~\ref{fig:climhaz}); the largest damage ratio in the whole catalogue is \val{q11.hazard.mdr_max|pct2}\%, during Lothar, and the expected worst damage of a year is \val{q11.hazard.exp_worst_mean|ppm}~ppm of the collateral on average. The VaR changes are not comparable across models: with $10{,}000$ scenarios VaR is a single scenario, and its change is the damage of the one storm year paired with it. ES, an average over ten scenarios, is the reliable measure; its increase matches a closed-form first-order approximation (Appendix~E). Because storms and defaults are independent, the tail is hit no harder than the mean: ES rises by about \val{q11.first_order.M2.dES|ppm}~ppm against \val{q11.dEL_exact|ppm}~ppm for the expected loss.
+
+\begin{table}[tb]
+\caption{Reference run ($N=2{,}000{,}000$): increase of the expected loss (M2), VaR and ES due to the storm overlay (ppm), for the baseline and five variants. First row: first-order approximation. ES is the reliable measure; the VaR columns are dominated by a single scenario.}
+\label{tab:climvar}
+\centering
+\qrmtable{tab_climate_variants}
+\end{table}
+
+\paragraph{A more geographically diversified portfolio.}
+All counterparties are in Switzerland, smaller than a typical storm footprint: the most damaging event hits \val{q11.hazard.share_names_hit_by_top_event|pct0}\% of them at once. To mimic full diversification we let every counterparty draw its own, independent storm year (Table~\ref{tab:climvar}, ``Independent storm years''). ES then changes by \val{q11.ref.diversified.M2.dES|ppm}~ppm under M2, against \val{q11.ref.base.M2.dES|ppm}~ppm in the baseline, with no systematic difference across models. Under independence what matters is the \emph{average} hazard at the locations of the defaulting names, not its concentration. A diversified portfolio would thus show a different effect only if its locations were on average more exposed (North Sea coasts, cyclone or flood zones) or less exposed (south of the Alps) than Switzerland.
+
+\paragraph{When concentration does matter: dependence.}
+If the worst storm years were paired with the worst credit years (``Comonotone'' in Table~\ref{tab:climvar}), ES under M2 would rise by \val{q11.ref.comonotone.M2.dES|ppm}~ppm (USD~\val{q11.ref.comonotone.M2.dES_usd|usd}), \val{q11.ref.comonotone.M2.dES_vs_base|f0} times the baseline. Only then is concentration costly, since one bad storm year hits all Swiss names together. Even this extreme pairing moves ES by less than $0.02\%$; it bounds the cost of the independence assumption, the strongest simplification of the exercise.
+
+\paragraph{Beyond the assignment: link to the course model and a hazard stress.}
+\begin{table}[tb]
+\caption{Storms through both credit channels (reference run, $\phi_k=0.5$, asset volatility $\sigma_A=25\%$ unless stated). $\Delta$EL exact; $\Delta$ES first-order. Lower block: all gust speeds raised by the stated percentage.}
+\label{tab:climchannels}
+\centering
+\qrmtable{tab_climate_channels}
+\end{table}
+Our overlay is exactly the LGD channel of the credit model with physical risk of \citet{Pozdyshev25} presented in the course, with $1-e^{-\alpha}=\phi\MDR$ (Appendix~E). In their model the same storm also lowers the firm's asset value and hence raises its default probability. Adding this \emph{PD channel} (Table~\ref{tab:climchannels}) raises the expected-loss effect to \val{q11x.ref.both.dEL_exact|ppm}~ppm, \val{q11x.pd_share_EL|pct0}\% of it from the PD channel: a small jump in asset value moves a small default probability proportionally more than it moves the recovery. ES rises by USD~\val{q11x.ref.both.M2.dES_usd|usd2} under M2, and the IRB capital by \val{q11x.irb.s25.d_both|ppm}~ppm. Finally, a stylised high-hazard scenario that raises every gust speed by $20\%$ multiplies the expected damage by \val{q11x.stress.s020.Em_ratio_to_base|f1}, because the impact function is steeply convex; ES then rises by USD~\val{q11x.ref.g20.M2.dES_usd|usd0} under M2, still below $0.01\%$. For a Swiss portfolio the conclusion that winter storms are immaterial is robust to both extensions.

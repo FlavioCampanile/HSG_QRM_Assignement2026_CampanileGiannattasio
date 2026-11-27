@@ -63,6 +63,8 @@
 \InputIfFileExists{generated/numbers.tex}{}{}
 % Visible reminder for text that can only be written once the CLIMADA results exist.
 \newcommand{\todo}[1]{\textbf{[TO DO: #1]}}
+% Boxed key message at the start of each section (management reading path).
+\newcommand{\keymsg}[1]{\par\medskip\noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{\textbf{Key message.} #1}}\par\medskip}
 
 % --- Tables: scale down to the text width only when a table is wider -------------------------
 \newsavebox{\qrmbox}
@@ -98,26 +100,18 @@
 \maketitle
 
 \begin{abstract}
-We estimate the one-week $99.9\%$ value-at-risk (VaR) and expected shortfall (ES) of a portfolio of 100 corporate bonds whose defaults are driven by the weekly returns of the Swiss Performance Index and the S\&P~500. Default probabilities, and hence the expected loss of USD~\val{q5.EL|usd}, are held fixed, while the joint law of the two factors is the empirical distribution (M1), a bivariate Gaussian (M2), or Gaussian margins with a $t$-copula (M3). With two million scenarios the VaR is USD~\val{q8.M2.VaR_ref|mn2}, \val{q8.M3.VaR_ref|mn2} and \val{q8.M1.VaR_ref|mn2} million under M2, M3 and M1. The $t$-copula is statistically preferred to the Gaussian copula but adds only \val{q8.M3.VaR_vs_M2|pct1}\% to VaR; the fat-tailed, left-skewed empirical margins add \val{q8.M1.VaR_vs_M2|pct0}\%. With $10{,}000$ scenarios, a common production size, the Monte Carlo standard error of VaR is \val{derived.se_rel_min|pct0}--\val{derived.se_rel_max|pct0}\%, larger than the M2--M3 difference. The Basel IRB capital, USD~\val{q10.K|usd}, is about a third of the model-based unexpected loss, almost entirely because the systematic weights of the portfolio exceed the regulatory asset correlations. In rolling 500-day windows the Gaussian VaR is nearly constant, whereas the empirical VaR depends on whether a crash week lies inside the window. A CLIMADA winter-storm overlay that erodes recovery values raises the expected loss by \val{q11.dEL_exact|ppm} parts per million and ES by a similar amount; with storms independent of credit risk only the expected damage at the defaulting names matters, so geographical concentration is irrelevant to first order.
+We measure the risk of extreme loss of a portfolio of 100 corporate bonds over one week, at the $99.9\%$ level used by Basel regulation. Defaults cluster because the issuers' asset values move with the Swiss and US equity markets, so the result depends on how the two markets are assumed to move together. Holding every default probability fixed, the $99.9\%$ value-at-risk (VaR) is USD~\val{q8.M2.VaR_ref|mn2} million if market returns are Gaussian, USD~\val{q8.M3.VaR_ref|mn2} million if the two markets are allowed to crash together ($t$-copula), and USD~\val{q8.M1.VaR_ref|mn2} million if history is replayed as observed. The fat left tail of each market therefore matters far more than joint crashes. The Basel IRB capital, USD~\val{q10.K|usd}, covers only about a third of the model-based unexpected loss, because the portfolio is more exposed to the market than the regulatory correlations assume. Winter storms, assessed with the CLIMADA climate-risk platform, change expected loss and expected shortfall by amounts of the order of a few US dollars.
 \end{abstract}
 
-\section{Introduction}
-\label{sec:intro}
-\input{sections/Introduction/1_1_motivation_research_question}
-\input{sections/Introduction/1_2_what_we_do_and_find}
-\input{sections/Introduction/1_3_roadmap}
-
-\input{sections/2_risk_measures}
-\input{sections/3_model}
-\input{sections/4_data}
-\input{sections/5_factor_models}
-\input{sections/6_simulation}
-\input{sections/7_results_var_es}
-\input{sections/8_rolling}
-\input{sections/9_basel_irb}
-\input{sections/10_climate}
-\input{sections/11_conclusion}
-\input{sections/appendix}
+\input{sections/m01_summary}
+\input{sections/m02_setting}
+\input{sections/m03_method}
+\input{sections/m04_results}
+\input{sections/m05_rolling}
+\input{sections/m06_irb}
+\input{sections/m07_climate}
+\input{sections/m08_conclusion}
+\input{sections/m09_appendix}
 
 \input{sections/bibliography}
 

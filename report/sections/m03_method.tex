@@ -1,0 +1,28 @@
+% =====================================================================
+% 3. Risk measures and simulation -- questions (v)-(vii); details in Appendix C-D
+% =====================================================================
+\section{How We Measure Tail Risk}
+\label{sec:method}
+
+\keymsg{A $99.9\%$ risk measure is set by the ten worst of $10{,}000$ scenarios, so its simulation error must be measured. We do so with a reference run of two million scenarios.}
+
+\paragraph{Risk measures.}
+Following Chapter~1 of the lecture notes \citep{DeGiorgi26}, the value-at-risk $\VaR_\alpha$ is the loss that is exceeded with probability at most $1-\alpha$, and the expected shortfall $\ES_\alpha$ is the average loss in that worst $1-\alpha$ of cases. ES is coherent, while VaR is not subadditive in general. The unexpected loss $\UL_\alpha=\VaR_\alpha-\E[L]$ is the amount that capital is meant to cover. We use $\alpha=99.9\%$, the Basel IRB level. The formal definitions and their estimators for a simulated, discrete loss are given in Appendix~D.
+
+\paragraph{Simulation (questions v--vii).}
+Each scenario draws the two market returns from the model at hand (a historical week under M1, a Gaussian draw under M2, a $t$-copula draw with Gaussian margins under M3; algorithms in Appendix~C) and $100$ independent firm-specific shocks. It then computes the asset returns $Y_k$ by (\ref{eq:Yk}), the defaults $I_k$ and the portfolio loss $L$. As required, we simulate $10{,}000$ scenarios per model. The three models use the \emph{same} random numbers, so that differences between them are not blurred by different draws.
+
+\paragraph{Default thresholds.}
+The threshold $d_k$ must satisfy $\P[Y_k\le d_k]=\pi_k$. Following the assignment's hint, we take the empirical $\pi_k$-quantile of the $10{,}000$ simulated $Y_k$: each firm then defaults in exactly a share $\pi_k$ of the scenarios, and the average simulated loss equals the expected loss to the cent. For the best ratings this quantile rests on very few scenarios (one for AAA), so we also compute a \emph{reference threshold} that solves the same condition on the model itself, without simulation error (Appendix~C).
+
+\paragraph{Measuring precision.}
+A $99.9\%$ VaR from $10{,}000$ scenarios is the tenth-largest loss, a thin basis for an estimate. We therefore also run every model on two million scenarios, organised as $200$ independent repetitions of the $10{,}000$-scenario experiment. The spread across repetitions gives the standard error of each estimate and of each difference between models.
+
+\begin{figure}[tb]
+\centering
+\qrmfigure{fig_loss_hist}
+\caption{Simulated distribution of the portfolio loss under the three models (question vii), $10{,}000$ scenarios each, logarithmic vertical axis. The models agree in the body and separate only in the far right tail.}
+\label{fig:hist}
+\end{figure}
+
+Figure~\ref{fig:hist} shows the three simulated loss distributions. In most scenarios no or few firms default; the models are indistinguishable in this region and differ only in the far tail, where the $99.9\%$ measures are determined.

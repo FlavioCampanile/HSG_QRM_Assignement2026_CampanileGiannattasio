@@ -1,0 +1,36 @@
+% =====================================================================
+% 4. VaR and ES -- question (viii)
+% =====================================================================
+\section{Value-at-Risk and Expected Shortfall}
+\label{sec:results}
+
+\keymsg{Historical returns give a VaR \val{q8.M1.VaR_vs_M2|pct0}\% above the Gaussian model; allowing joint crashes adds only \val{q8.M3.VaR_vs_M2|pct1}\%. The fat tails of each market, not their dependence, drive tail risk.}
+
+\begin{table}[tb]
+\caption{Question (viii), baseline run: $99.9\%$ VaR and ES (USD) from $10{,}000$ scenarios, with the empirical-quantile thresholds $\hat d_k$ and with the reference thresholds $d_k$. Standard errors from 200 repetitions; last row: the difference M3 $-$ M2. The expected loss is USD~\val{q5.EL|usd} in all models.}
+\label{tab:var}
+\centering
+\qrmtable{tab_var_es}
+\end{table}
+
+\begin{table}[tb]
+\caption{Reference run: VaR, ES and unexpected loss (UL $=$ VaR $-$ EL), USD, two million scenarios. ``\% exp.'': VaR in per cent of total exposure. Standard errors of the M3 $-$ M2 difference in parentheses.}
+\label{tab:varref}
+\centering
+\qrmtable{tab_var_es_ref}
+\end{table}
+
+\paragraph{The numbers.}
+With $10{,}000$ scenarios (Table~\ref{tab:var}) the $99.9\%$ VaR is USD~\val{q8.M2.VaR_10k_quantile_thr|usd} under M2, USD~\val{q8.M3.VaR_10k_quantile_thr|usd} under M3 and USD~\val{q8.M1.VaR_10k_quantile_thr|usd} under M1. With two million scenarios (Table~\ref{tab:varref}) the same figures are USD~\val{q8.M2.VaR_ref|usd}, USD~\val{q8.M3.VaR_ref|usd} and USD~\val{q8.M1.VaR_ref|usd}, i.e.\ \val{q8.M2.VaR_pct_exposure|pct1}\%, \val{q8.M3.VaR_pct_exposure|pct1}\% and \val{q8.M1.VaR_pct_exposure|pct1}\% of exposure. ES exceeds VaR by \val{derived.ES_over_VaR_min|pct0}--\val{derived.ES_over_VaR_max|pct0}\% and ranks the models in the same way.
+
+\paragraph{Joint crashes (M3 against M2) matter little.}
+The $t$-copula raises VaR by \val{q8.M3.VaR_vs_M2|pct1}\% (USD~\val{q8.M3_minus_M2.dVaR_ref|usd}, standard error about USD~\val{q8.M3_minus_M2.se_dVaR_ref|usd}) and ES by \val{q8.M3.ES_vs_M2|pct1}\%: statistically detectable, economically minor. Three reasons explain it. Each firm sees the markets only through a weighted sum of the two returns, and summing two bell-shaped, already highly correlated returns produces an almost bell-shaped result whatever their copula. The estimated copula ($\hat\nu\approx15$) is only a moderate departure from the Gaussian one. And the firm-specific shocks remain Gaussian and independent, which dilutes the market's tail behaviour.
+
+\paragraph{Fat tails (M1 against M2) matter a lot, but rest on few weeks.}
+Replaying history raises VaR by \val{q8.M1.VaR_vs_M2|pct0}\% and ES by \val{q8.M1.ES_vs_M2|pct0}\%; the $99.9\%$ quantile of the number of defaults rises from \val{q8.M2.defaults_q999|int} to \val{q8.M1.defaults_q999|int}. At the $99\%$ level the gap is only \val{derived.M1_vs_M2_99|pct0}\%: the models separate in the far tail. Each week has probability $1/n=\val{derived.one_over_n|pct3}\%$ under M1, so the $0.1\%$ tail consists of one or two weeks: those ending \val{derived.cel1_week|date} (expected loss given that week USD~\val{derived.cel1|mn2} million) and \val{derived.cel2_week|date} (USD~\val{derived.cel2|mn2} million). Falls of this size are practically impossible under Gaussian margins. The M1 figure is therefore realistic about crashes but fragile: it would change with a different sample, and it cannot produce a week worse than the worst one observed.
+
+\paragraph{Precision: $10{,}000$ scenarios cannot rank M2 and M3.}
+With $10{,}000$ scenarios the standard error of VaR is \val{derived.se_rel_min|pct0}--\val{derived.se_rel_max|pct0}\% of its value (Table~\ref{tab:var}). The empirical-quantile thresholds give the more precise estimate, because recalibrating in each sample offsets part of the sampling noise. The noise in the M3 $-$ M2 difference is \val{derived.noise_ratio|f1} times the difference itself, and M3 comes out \emph{below} M2 in \val{q8.M3_minus_M2.ref_thr.p_M3_below_M2_crn|pct0}\% of the repetitions; our own baseline run shows opposite signs with the two thresholds. Statements on the size of the copula effect rest on the two-million-scenario run alone.
+
+\paragraph{Name concentration is minor.}
+Removing all firm-specific risk, i.e.\ moving to an infinitely granular portfolio with the same market exposure, lowers VaR by at most \val{derived.gran_share_VaR_max|pct1}\%: with $100$ names, tail risk is market risk.

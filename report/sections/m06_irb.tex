@@ -1,0 +1,56 @@
+% =====================================================================
+% 6. Basel IRB -- question (x)
+% =====================================================================
+\section{Regulatory Capital: the Basel IRB Formula}
+\label{sec:irb}
+
+\keymsg{The IRB capital is USD~\val{q10.K|usd} (RWA USD~\val{q10.RWA|usd}), about a third of the model-based unexpected loss. Almost the whole gap comes from one assumption: the portfolio's firms are far more exposed to the market than the regulatory correlations allow for.}
+
+\subsection{CAPITAL CHARGE BY COUNTERPARTY}
+For each counterparty we apply the IRB formula of the assignment \citep{BCBS05} with $\mathrm{AVC}=1$ and maturity $M=1$:
+\begin{align*}
+\rho_k&=0.12\,w_k+0.24\,(1-w_k),\qquad w_k=\frac{1-e^{-50\pi_k}}{1-e^{-50}},\\
+K_k&=(1-R_k)\left[\Phi\!\left(\frac{\Phi^{-1}(\pi_k)+\sqrt{\rho_k}\,\Phi^{-1}(0.999)}{\sqrt{1-\rho_k}}\right)-\pi_k\right]\mathrm{MA}(\pi_k,M).
+\end{align*}
+The term in brackets is the default probability in a $1$-in-$1{,}000$ bad year minus the expected one, which provisions already cover. Table~\ref{tab:irb} reports the results by rating class: $\rho_k$ falls from $0.24$ for the best ratings to $0.12$ for CCC, and $K_k$ rises from \val{q10.Kbar_pct.AAA|f2}\% of exposure for AAA to \val{q10.Kbar_pct.CCC|f2}\% for CCC. Summing, $K=\sum_kE_kK_k=$ USD~\val{q10.K|usd} (\val{q10.K_pct|pct2}\% of exposure) and $\mathrm{RWA}=12.5\,K=$ USD~\val{q10.RWA|usd}; B and CCC names account for \val{derived.K_share_B_CCC|pct0}\% of $K$.
+
+\begin{table}[tb]
+\caption{Basel IRB quantities by rating class ($\mathrm{AVC}=1$, $M=1$). $\bar K_k$, $\overline{\mathrm{LGD}}$: averages within the class; amounts in USD. Last column: average market share of risk $\lambda_k$ in our model.}
+\label{tab:irb}
+\centering
+\qrmtable{tab_irb}
+\end{table}
+
+\paragraph{What $\mathrm{MA}(\pi_k,1)$ means.}
+With $M=1$ the maturity adjustment is neutral for every counterparty:
+\[
+\mathrm{MA}(\pi_k,1)=\frac{1+(1-2.5)\,b(\pi_k)}{1-1.5\,b(\pi_k)}=1 .
+\]
+The core formula covers default within the one-year horizon. A longer loan can also lose value within the year through a downgrade, and the adjustment adds capital for this migration risk. With a maturity of exactly one year nothing of the loan is left after the horizon to be downgraded, so $K_k$ is a pure default charge.
+
+\subsection{WHY IRB CAPITAL AND MODEL-BASED LOSS DIFFER}
+The unexpected loss is USD~\val{q8.M2.UL_ref|usd} under M2 and USD~\val{q8.M3.UL_ref|usd} under M3, \val{q10.ratio_UL_M2|f2} and \val{q10.ratio_UL_M3|f2} times $K$. The IRB formula is itself the $99.9\%$ unexpected loss of a specific model: one Gaussian factor, the prescribed correlation $\rho_k$, and infinitely many small loans \citep{Vasicek02,Gordy03}. Table~\ref{tab:gap} moves from that model to ours one assumption at a time.
+
+\begin{table}[tb]
+\caption{From the IRB capital to the model-based unexpected loss at $99.9\%$ (reference run), one assumption at a time.}
+\label{tab:gap}
+\centering
+\qrmtable{tab_irb_gap}
+\end{table}
+
+\begin{itemize}
+\item \emph{Correlation level: almost the entire gap.} In our model $\lambda_k$ plays the role of $\rho_k$ (Appendix~A). The portfolio's $\lambda_k$ average \val{q10.lambda_mean|f2}, against regulatory values of $0.12$--$0.24$, and do not fall with the default probability. Using $\rho_k=\lambda_k$ in the IRB formula alone multiplies the capital by \val{derived.K_lambda_ratio|f2}.
+\item \emph{Two factors instead of one:} small, because the two indices are highly correlated and all loadings are positive.
+\item \emph{Granularity:} $100$ names instead of infinitely many adds \val{derived.gran_share_UL_M2|pct0}\% of the unexpected loss under M2.
+\item \emph{Shape of the factors:} the $t$-copula adds \val{derived.UL_M3_vs_M2|pct1}\%, historical returns \val{derived.UL_M1_vs_M2|pct0}\%.
+\item \emph{Horizon:} immaterial under M2, since after calibrating $d_k$ only the shape of the factor distribution matters (Appendix~A).
+\end{itemize}
+
+\subsection{WHY A REGULATOR PREFERS THE SIMPLER FORMULA}
+\begin{itemize}
+\item \emph{Portfolio invariance:} the capital for a loan depends only on that loan, so capital is additive and translates directly into risk weights \citep{Gordy03}.
+\item \emph{Comparability:} two banks holding the same loan hold the same capital. Model-based capital would differ for reasons unrelated to risk; in our case, the choice between M1, M2 and M3 alone moves the unexpected loss by about \val{derived.UL_M1_vs_M2|pct0}\%.
+\item \emph{Less room for model risk and arbitrage:} correlations and tail shapes, the inputs to which the tail is most sensitive and which are hardest to backtest at $99.9\%$, are fixed by the regulator.
+\item \emph{Verifiability:} a closed formula can be checked line by line; a simulated figure carries Monte Carlo error (Section~\ref{sec:results}).
+\end{itemize}
+The price is that the formula ignores what is specific to a portfolio, such as concentration and correlations above the prescribed ones; Basel leaves these to the supervisory review of Pillar~2. Our portfolio shows that this omission need not be conservative.
