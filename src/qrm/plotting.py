@@ -24,6 +24,7 @@ plt.rcParams.update({"font.family": "serif", "mathtext.fontset": "cm", "font.siz
 def save(fig, name):
     """Write the figure as PDF (for the report) and PNG (for a quick look)."""
     C.FIGURES.mkdir(parents=True, exist_ok=True)
-    fig.savefig(C.FIGURES / f"{name}.pdf")
-    fig.savefig(C.FIGURES / f"{name}.png", dpi=200)
+    # no creation date in the files: re-running the scripts reproduces them byte for byte
+    fig.savefig(C.FIGURES / f"{name}.pdf", metadata={"CreationDate": None})
+    fig.savefig(C.FIGURES / f"{name}.png", dpi=200, metadata={"Software": None})
     plt.close(fig)

@@ -5,15 +5,27 @@ Group: Flavio Massimo Campanile, Pietro Tommaso Giannattasio. Deadline: **1 Dec 
 
 ## Set-up (once)
 
+Python >= 3.10. Two options:
+
 ```
-conda activate climada_env          # the environment that has CLIMADA (see environment.yml)
-pip install -e .                    # makes the `qrm` package in src/ importable
+# (a) without CLIMADA - enough to reproduce every number, table and figure of the report
+python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+pip install -e .                                       # makes the `qrm` package in src/ importable
+
+# (b) with CLIMADA - only needed to rebuild the storm catalogue (script 06)
+conda env create -f environment.yml && conda activate climada_env
+pip install -e .
 ```
+
+The storm catalogue that script 06 builds from CLIMADA is versioned in the repository
+(`results/climate/storm_catalogue.npz`), so option (a) reproduces question (xi) as well.
 
 ## Run
 
 ```
-python scripts/run_all.py           # questions iv-xi and the inputs of the report
+python scripts/run_all.py --skip-climada   # questions iv-xi and the inputs of the report, ~10 min
+python scripts/run_all.py                  # the same, rebuilding the storm catalogue with CLIMADA first
 ```
 
 or step by step:
@@ -36,6 +48,18 @@ Script 07 reads that file and does not need CLIMADA. `python scripts/07_climate_
 runs the overlay on a synthetic catalogue to test the code; its outputs carry the suffix `_DEMO`
 and are never used by the report.
 
+## Reproducibility
+
+- Every random draw is seeded (`SEED` in `src/qrm/config.py`, one independent stream per experiment), so a
+  run gives the same numbers on every machine. On a fresh clone, `python scripts/run_all.py --skip-climada`
+  reproduces all JSON files, tables and `report/generated/numbers.tex` byte for byte, and the figures too
+  with the same matplotlib version: after the run, `git status` shows no changes. Checked with Python 3.13,
+  numpy 2.5, scipy 1.18 and pandas 3.0; the numbers coincide with those committed from the authors' machines.
+- The rolling analysis of question ix (script 04) reuses `results/tables/rolling_var_es.csv` when it
+  exists; `python scripts/run_all.py --force-rolling` recomputes it (about 15 minutes).
+- Script 06 depends on the CLIMADA data API (hazard `storm_europe`, Switzerland); the version of the data
+  set it used is recorded in the `meta` field of the catalogue file.
+
 ## Layout
 
 | Path | Content |
@@ -49,6 +73,7 @@ and are never used by the report.
 | `src/qrm/basel_irb.py` | question x |
 | `src/qrm/climada_io.py` | question xi: hazard and impact function from CLIMADA (only module importing CLIMADA) |
 | `src/qrm/climate.py` | question xi: storm years, exact law of the worst event, overlay |
+| `src/qrm/climate_channels.py` | question xi, extensions: PD and LGD channels (Pozdyshev et al. 2025), climate-adjusted IRB, gust stress |
 | `src/qrm/pipeline.py` | shared set-up, common random numbers, output helpers |
 | `scripts/` | one script per block of questions; they write `results/tables` and `results/figures` |
 | `report/` | LaTeX sources (class `roffin.cls`); upload this folder to Overleaf |
